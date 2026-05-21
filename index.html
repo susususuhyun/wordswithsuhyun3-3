@@ -1,455 +1,221 @@
 <!DOCTYPE html>
-<html lang="ko" class="h-full">
+<html lang="ko">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>얼룩말영어학원 워마 고등베이직 11-12 어원 단어장</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://unpkg.com/react@18/umd/react.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js" crossorigin></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Noto+Sans+KR:wght@400;500;700;900&display=swap" rel="stylesheet">
-  <style>
-    body { font-family: 'Noto Sans KR', sans-serif; -webkit-tap-highlight-color: transparent; }
-    .mono { font-family: 'IBM Plex Mono', monospace; }
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: #0b0f19; }
-    ::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 4px; }
-    .perspective-1000 { perspective: 1000px; }
-    .preserve-3d { transform-style: preserve-3d; }
-    .backface-hidden { backface-visibility: hidden; }
-    .rotate-y-180 { transform: rotateY(180deg); }
-    .fade-in { animation: fadeIn 0.25s ease-out forwards; }
-    @keyframes fadeIn { from { opacity:0; transform:translateY(6px); } to { opacity:1; transform:translateY(0); } }
-    .glow-cyan { box-shadow: 0 0 20px rgba(14,165,233,0.12); }
-    .stripe-blue {
-      background-image: repeating-linear-gradient(
-        45deg, #0f172a, #0f172a 8px, #0ea5e9 8px, #0ea5e9 10px
-      );
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>얼룩말영어학원 고등 BASIC 단어장 (무작위 셔플)</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        .card-flip { perspective: 1000px; }
+        .card-inner { transition: transform 0.5s; transform-style: preserve-3d; }
+        .card-flipped { transform: rotateY(180deg); }
+        .card-front, .card-back { backface-visibility: hidden; }
+        .card-back { transform: rotateY(180deg); }
+    </style>
 </head>
-<body class="h-full text-slate-100 antialiased overflow-hidden bg-[#0b0f19]">
-  <div id="root" class="h-full"></div>
+<body class="flex justify-center min-h-screen">
 
-  <script type="text/babel">
-    const { useState, useEffect, useMemo, useRef } = React;
+    <div class="w-full max-w-md bg-white shadow-xl flex flex-col justify-between min-h-screen border-x border-slate-200">
+        
+        <header class="bg-indigo-600 text-white p-4 text-center shadow-md z-10">
+            <h1 class="text-xl font-bold tracking-wide">🦓 얼룩말영어학원</h1>
+            <p class="text-xs text-indigo-200 mt-1 font-medium">워마 고등 BASIC 13 재시험 단어장 (순서 섞임)</p>
+        </header>
 
-    // 고등 BASIC 11-12과 80단어 어원/동계어 통합 데이터
-    const WORDS = [
-      { id: 1, word: "population", meaning: "인구, 주민, 개체군", prefix: "popul- (사람들)", root: "populus (라틴어: 대중, 로마 시민)", story: "사람들이 한데 모여 무리를 이루고 사는 전체 대상을 뜻하는 말에서 유래해, 현재는 특정 지역의 총 인구수를 나타냅니다.", related: "popular (인기 있는), populate (거주시키다), public (공공의)" },
-      { id: 2, word: "foster", meaning: "양육하다, 육성하다, 촉진하다", prefix: "fost- (음식, 영양)", root: "fostrian (고대 영어: 먹여 살리다)", story: "아이가 잘 자라도록 주기적으로 음식을 먹이고 돌보아 준다는 본질에서 '키우다, 촉진하다'라는 뜻이 파생되었습니다.", related: "foster home (위탁 가정), food (음식 - 어원 공유)" },
-      { id: 3, word: "nurture", meaning: "양육하다, 육성하다, 양육, 교육", prefix: "nutr- (양분, 젖)", root: "nutrire (라틴어: 영양을 공급하다)", story: "단순히 몸을 먹여 살리는 것을 넘어, 올바른 지식과 도덕을 가르쳐 훌륭하게 키워내는 교육적 보살핌을 뜻합니다.", related: "nutrient (영양소), nutrition (영양), nurse (간호사, 유모)" },
-      { id: 4, word: "available", meaning: "이용할[얻을] 수 있는, 시간이 있는", prefix: "a- (to) + val- (가치, 힘)", root: "valere (라틴어: 효력이 있다, 강하다)", story: "필요할 때 손을 뻗으면 즉시 그 가치와 효력을 발휘하여 내 것으로 쓸 수 있는 상태를 뜻합니다.", related: "avail (도움이 되다), value (가치), valid (유효한)" },
-      { id: 5, word: "discover", meaning: "발견하다, 알아내다, 발굴하다", prefix: "dis- (반대, 제거) + cover (덮개)", root: "cooperire (라틴어: 완전히 덮다)", story: "원래 보이지 않게 무언가를 꽁꽁 덮어두었던 베일이나 덮개를 바깥으로 완전히 벗겨내어 세상에 드러내다라는 의미입니다.", related: "cover (덮다), uncover (폭로하다), recover (회복하다 - 다시 덮어 찾다)" },
-      { id: 6, word: "carbon", meaning: "탄소", prefix: "carb- (숯, 석탄)", root: "carbo (라틴어: 타다 남은 숯덩이)", story: "고대인들이 나무를 태우고 남은 까만 숯을 가리키던 말에서 과학의 발달과 함께 화학 원소인 '탄소'를 지칭하게 되었습니다.", related: "carbohydrate (탄수화물), charcoal (목탄, 숯)" },
-      { id: 7, word: "pressure", meaning: "압력, 압박(감)", prefix: "press- (누르다)", root: "premere (라틴어: 꾹 물리적인 힘을 가하다)", story: "위나 옆에서 단단한 힘으로 짓누르는 물리적 압력에서부터, 마음을 짓누르는 정신적인 중압감까지 일컫는 말입니다.", related: "press (누르다), express (표현하다 - 짜내다), depress (우울하게 하다)" },
-      { id: 8, word: "accuse", meaning: "고발하다, 비난하다", prefix: "ac- (to) + -cuse (소송, 원인)", root: "causa (라틴어: 소송의 이유, 원인)", story: "상대방의 얼굴을 향해 '네가 이 나쁜 사건의 원인 제공자다'라고 손가락질하며 법정에 공식 세우는 그림입니다.", related: "cause (원인), excuse (변명하다 - 소송에서 빼내 주다)" },
-      { id: 9, word: "outstanding", meaning: "뛰어난, 눈에 띄는, 현저한", prefix: "out- (바깥으로) + stand (서다)", root: "고대 영어 기반 구문", story: "평범하게 줄지어 서 있는 다른 사람들 사이에서 혼자만 밖으로(out) 한 발짝 툭 튀어나와 서 있으니 대단히 잘 보인다는 의미입니다.", related: "stand (서다), standard (기준), stays (머무르다)" },
-      { id: 10, word: "conversation", meaning: "대화, 대담", prefix: "con- (함께) + vers- (돌다, 바꾸다)", root: "conversari (라틴어: 함께 어울려 지내다)", story: "상대방과 마주 앉아 한 공간에서 함께 눈빛과 의견을 주거니 받거니 주고받으며(turn) 지내는 친밀한 말하기 행위입니다.", related: "convert (전환하다), reverse (역전시키다), universe (우주 - 하나로 도는 것)" },
-      { id: 11, word: "massive", meaning: "거대한, 대량의", prefix: "mass- (덩어리)", root: "massa (그리스어: 보리떡, 반죽 덩어리)", story: "밀가루 반죽을 크게 뭉쳐놓은 것처럼 부피가 아주 거대하고 무게가 묵직하게 나가는 상태를 비유합니다.", related: "mass (대중, 덩어리), massacre (대량 학살)" },
-      { id: 12, word: "analogy", meaning: "비유, 유사, 유추", prefix: "ana- (따라서, 일치하여) + log- (말, 비율)", root: "analogia (그리스어: 올바른 비율과 논리)", story: "두 대상 사이에 흐르는 일정한 구조적 비율이나 논리적 유사점을 바탕으로 상황을 알기 쉽게 빗대어 설명하는 것입니다.", related: "logic (논리), dialogue (대화), apology (사과 - 해명의 말)" },
-      { id: 13, word: "wound", meaning: "상처를 입히다, 감정을 상하게 하다, 상처", prefix: "won- (고통, 투쟁)", root: "wund (고대 영어: 칼이나 무기에 찢긴 상처)", story: "전투 중에 무기에 찔려 피를 흘리는 육체적 상처에서, 날카로운 말로 자존심에 깊은 타격을 주는 정신적 손상으로 넓어졌습니다.", related: "wounded (부상당한), wonder (어원은 다름에 유의)" },
-      { id: 14, word: "cause", meaning: "원인이 되다, 야기하다, 원인", prefix: "caus- (이유, 소송)", root: "causa (라틴어: 사건을 일으킨 근본적 계기)", story: "어떠한 결과나 현상이 세상에 튀어나올 수밖에 없도록 맨 처음 불씨를 댕긴 뿌리이자 정당한 이유를 말합니다.", related: "accuse (고발하다), excuse (변명), causal (인과관계의)" },
-      { id: 15, word: "consequence", meaning: "결과, 영향(력), 중요함", prefix: "con- (함께) + sequ- (따르다)", root: "consequi (라틴어: 뒤따라 일어나는 일)", story: "앞선 원인이나 행동들과 한 세트가 되어 그림자처럼 쫄래쫄래 뒤따라와(sequence) 최종적으로 들이닥치는 결과를 의미합니다.", related: "sequence (순서), subsequent (차후의), execute (실행하다 - 끝까지 쫓다)" },
-      { id: 16, word: "election", meaning: "선거, 당선", prefix: "ex- (밖으로) + lect- (모으다, 고르다)", root: "eligere (라틴어: 수많은 것 중에서 뽑아내다)", story: "수많은 인물 후보군 중에서 가장 적합하고 훌륭한 사람을 바깥으로(ex) 콕 집어 골라내는(choose) 민주적 절차입니다.", related: "select (선택하다), collect (모으다), lecture (강의 - 글을 골라 읽음)" },
-      { id: 17, word: "trace", meaning: "추적하다, 찾아내다, 자취, 흔적", prefix: "tract- (끌다)", root: "trahere (라틴어: 선을 그리며 물건을 끌고 가다)", story: "바닥에 무거운 물건이나 발을 질질 끌고 갔을 때 길게 남겨진 선과 모양을 보며 앞선 존재를 뒤쫓아가는 행위입니다.", related: "track (추적하다), tractor (트랙터), attract (매혹하다 - 마음을 끌다)" },
-      { id: 18, word: "wire", meaning: "철사, 전선, 연결하다", prefix: "wir- (비틀다, 감다)", root: "wira (원시 게르만어: 유연하게 휘어지는 금속 선)", story: "단단한 철을 뜨겁게 달구어 실처럼 길고 가늘게 뽑아내, 유연하게 잘 구부러지도록 만든 철사와 전선을 가리킵니다.", related: "wiry (철사 같은, 강인한), iron (유사 용도 금속)" },
-      { id: 19, word: "restore", meaning: "회복시키다, 복원하다, 되찾다", prefix: "re- (다시) + store (세우다, 채우다)", root: "restaurare (라틴어: 무너진 것을 다시 튼튼히 고쳐 세우다)", story: "낡거나 부서져서 제 기능을 잃어버린 물건, 건강, 제도를 원래 가장 좋았던 전성기 상태로 다시 세우는 과정입니다.", related: "restaurant (레스토랑 - 기력을 회복시키는 곳), store (상점, 저장하다)" },
-      { id: 20, word: "cognitive", meaning: "인식의, 인지의", prefix: "co- (함께, 강조) + gnos- (알다)", root: "cognoscere (라틴어: 개념을 완벽하게 깨닫다)", story: "머릿속의 모든 감각 기관과 지각 능력을 총동원하여 사물의 이치나 정체를 명확하게 구분하여 아는 정신 과정을 뜻합니다.", related: "recognize (인정하다, 알아채다), ignore (무시하다 - 알지 못하다)" },
-      { id: 21, word: "biological", meaning: "생물학의, 생(물)체의", prefix: "bio- (생명) + logy (학문)", root: "bios + logos (그리스어: 살아 숨 쉬는 유기체에 대한 논리)", story: "지구상에 살아 숨 쉬는 모든 동식물과 세포들이 어떻게 작동하고 번식하는지 연구하는 생명 과학적 특성을 의미합니다.", related: "biology (생물학), biography (전기 - 삶의 기록), antibiotic (항생제)" },
-      { id: 22, word: "ability", meaning: "능력, 재능", prefix: "abil- (할 수 있는 적합한 상태)", root: "habilitas (라틴어: 몸에 배어 다루기 쉬움, 적당함)", story: "어떤 구체적인 일을 수월하게 처리할 수 있을 만큼 육체적, 정신적 도구와 준비가 완벽하게 갖추어진 힘입니다.", related: "able (할 수 있는), enable (가능하게 하다), disable (무능하게 하다)" },
-      { id: 23, word: "capacity", meaning: "용량, 수용력, 능력", prefix: "cap- (잡다, 담다)", root: "capere (라틴어: 물건이나 공간을 붙잡아 수용하다)", story: "어떤 그릇이나 방이 내부에 무언가를 얼마나 많이 꽉 움켜쥐어 담을 수 있는지의 '최대 허용 한계 부피'나 능력을 말합니다.", related: "capture (포획하다), capable (유능한 - 꽉 잡을 수 있는), accept (받아들이다)" },
-      { id: 24, word: "ingredient", meaning: "재료, 성분, 구성 요소", prefix: "in- (안으로) + gred- (걸어가다, 나아가다)", root: "ingredi (라틴어: 안으로 걸어 들어가 합류하다)", story: "맛있는 음식이나 복합적인 화학 제품을 완성하기 위해, 그 조리과정 안으로 직접 섞여 들어가는 개별 요소และ 원재료입니다.", related: "grade (등급 - 걸어 오르는 단계), progress (전진), aggressive (공격적인)" },
-      { id: 25, word: "adversity", meaning: "역경, 불운", prefix: "ad- (향해) + vers- (돌다)", root: "adversus (라틴어: 나를 향해 맞서 도는, 적대적인)", story: "내가 전진하고자 하는 방향과 정확히 반대 방향으로 거센 바람이 불어오듯, 삶의 상황이 적대적으로 돌아가는 시련을 말합니다.", related: "reverse (반대의), divorce (이혼 - 갈라져 돌다), universe (우주)" },
-      { id: 26, word: "intelligent", meaning: "지적인, 지성을 갖춘", prefix: "inter- (사이에) + leg- (고르다, 읽다)", root: "intelligere (라틴어: 여러 사물들 사이에서 진실을 분별하다)", story: "복잡하게 얽힌 현상 속에서 무엇이 옳고 그른지 예리하게 골라내어 명쾌하게 이해할 수 있는 높은 지적 역량을 뜻합니다.", related: "intellect (지성), lecture (강의), elegant (우아한 - 잘 골라진)" },
-      { id: 27, word: "multiple", meaning: "다수의, 많은, 복합적인", prefix: "mult- (많은) + ple (접다, 겹치다)", root: "multiplex (라틴어: 여러 겹으로 겹겹이 접힌 장막)", story: "단 한 장짜리가 아니라, 종이나 천을 수없이 여러 번 겹쳐서 접어놓은 것처럼 가짓수가 풍부하고 많은 상태를 뜻합니다.", related: "multiply (곱하다, 증식시키다), multitude (다수, 군중)" },
-      { id: 28, word: "exotic", meaning: "외국의, 이국적인", prefix: "exo- (바깥에)", root: "exotikos (그리스어: 우리 문명의 경계 영역 바깥에서 온)", story: "우리가 매일 보며 사는 익숙한 울타리 바깥 먼 이방의 국가에서 건너와, 낯설고 신비로운 느낌을 주는 대상을 빗대어 말합니다.", related: "ex- (바깥으로), exterior (외부의), exit (출구)" },
-      { id: 29, word: "reference", meaning: "언급, 참조, 참고 문헌", prefix: "re- (다시) + fer- (나르다, 가져가다)", root: "referre (라틴어: 올바른 정보를 얻기 위해 근원으로 되돌아가다)", story: "정확한 판단이나 논거를 대기 위해 신뢰할 만한 책이나 지식의 출처로 시선과 생각의 끈을 다시 실어 보내 확인하는 행위입니다.", related: "refer (지칭하다, 참조하다), infer (추론하다), prefer (선호하다)" },
-      { id: 30, word: "scatter", meaning: "(흩)뿌리다, 흩어지다", prefix: "scate- (사방으로 튀다)", root: "scateren (중세 영어: 사방으로 거칠게 내던지다)", story: "한곳에 옹기종기 모여 있는 물체들을 폭탄이 터지듯 사방팔방으로 넓게 흐트러뜨려 거리를 벌려 놓는 모양새입니다.", related: "shatter (산산이 부서지다 - 자매어)" },
-      { id: 31, word: "conflict", meaning: "갈등, 충돌, 대립하다", prefix: "con- (함께) + flict- (치다, 타격하다)", root: "confligere (라틴어: 두 세력이 정면으로 부딪쳐 싸우다)", story: "서로 다른 가치관이나 무기를 든 군대가 좁은 길목에서 마주쳐 쾅 하고 함께 부딪치며 격렬하게 싸우는 모양입니다.", related: "inflict (고통을 가하다), afflict (괴롭히다)" },
-      { id: 32, word: "friction", meaning: "마찰, 갈등", prefix: "frict- (문지르다)", root: "fricare (라틴어: 두 표면을 강하게 비비다)", story: "두 개의 거친 표면이 맞닿아 슥슥 비벼질 때 일어나는 물리적 마찰열에서, 사람 간 의견이 부딪쳐 생기는 부조화를 뜻합니다.", related: "frictionless (마찰 없는), friction tape (절연 테이프)" },
-      { id: 33, word: "asset", meaning: "자산, 재산", prefix: "ad- (to) + satis (충분히)", root: "assez (고대 프랑스어: 법적 빚을 다 갚기에 충분한 양)", story: "자신이 가지고 있는 채무를 모두 청산하고도 주머니에 당당하고 풍족하게 남을 만큼 경제 가치가 높은 알짜 자산을 뜻합니다.", related: "satisfy (만족시키다), insatiable (만족할 줄 모르는)" },
-      { id: 34, word: "professional", meaning: "직업의, 전문적인, 전문가", prefix: "pro- (대중 앞에서) + fess- (자신의 믿음을 고백하다)", root: "profiteri (라틴어: 선서하고 공인된 직업을 가지다)", story: "단순히 취미로 하는 것이 아니라 신과 대중 앞에 서약할 만큼 고도의 지식과 자격 기준을 선언하고 일하는 프로를 말합니다.", related: "profess (공언하다), confess (자백하다), professor (교수)" },
-      { id: 35, word: "disclose", meaning: "밝히다, 폭로하다, 드러내다", prefix: "dis- (반대, 열기) + close (닫다)", root: "claudere (라틴어: 자물쇠를 채워 문을 닫다)", story: "아무도 보지 못하게 비밀의 방 문을 꼭 닫아두었던 상태를 깨부수고 반대로(dis) 활짝 열어젖혀 속을 다 보여주는 행동입니다.", related: "close (닫다), enclose (에워싸다), exclude (배제하다)" },
-      { id: 36, word: "negotiate", meaning: "협상[교섭]하다, 타결하다", prefix: "neg- (아닌) + otium (한가로운 여가, 쉬는 시간)", root: "negotiari (라틴어: 쉬지 않고 비즈니스 무역을 하다)", story: "편안하게 쉴 틈(otium)조차 없이 양측의 이익 분배를 위해 치열하고 바쁘게 말을 나누며 최종 타결점을 찾아가는 과정입니다.", related: "negotiation (협상), negotiable (협상 가능한)" },
-      { id: 37, word: "split", meaning: "나누다, 분열되다, 갈라지다", prefix: "spli- (날카롭게 베다)", root: "splitten (중세 네덜란드어: 쐐기를 박아 쪼개다)", story: "도끼나 나무 쐐기를 중심에 내리쳐서 단단한 통나무나 하나였던 집단 체계를 조각조각 좌우로 갈라놓는 모습입니다.", related: "splinter (가시, 파편), split second (눈 깜짝할 사이)" },
-      { id: 38, word: "have difficulty (in) -ing", meaning: "~하는 데 어려움을 겪다", prefix: "diff- (dis- 반대) + fac- (수월하게 하다)", root: "difficultas (라틴어: 실행하기가 대단히 빡빡하고 힘듦)", story: "어떤 일이나 행동을 매끄럽고 쉽게 처리하지 못하도록 가로막는 커다란 돌덩이가 있어 곤란을 겪는 상태의 표현입니다.", related: "difficult (어려운), facile (술술 하는), factory (공장)" },
-      { id: 39, word: "go through", meaning: "~을 겪다, 거치다, 조사하다", prefix: "go (이동하다) + through (터널을 관통하여)", root: "고대 영어 기반 숙어", story: "캄캄하고 무서운 동굴 터널의 입구로 걸어 들어가 반대쪽 출구까지 온몸으로 다 뚫고 지나오며 온갖 경험을 다 해보다라는 뜻입니다.", related: "undergo (겪다), thorough (철저한 - 관통한)" },
-      { id: 40, word: "be regarded as", meaning: "~으로 간주되다[여겨지다]", prefix: "re- (반복, 강조) + gard (지켜보다, 보호하다)", root: "regarder (프랑스어: 특별한 주의를 기울여 시선을 던지다)", story: "어떠한 사람이나 사물을 대할 때, 마음속으로 '저것은 어떤 가치가 있는 대상이다'라고 지속적으로 눈여겨보며 평가하는 고정 틀입니다.", related: "regard (간주하다), guard (경비원), reward (보상)" },
-      { id: 41, word: "modern", meaning: "현대의, 현대인", prefix: "mod- (바로 지금, 한계, 측정)", root: "modernus (라틴어: 먼 과거가 아닌 최근 요즈음 방식의)", story: "케케묵은 옛날 풍습과 기준에서 완전히 탈피하여, '바로 지금 이 순간(now)'의 최신 유행과 기준에 맞추어 돌아가는 상태를 일컫습니다.", related: "mode (양식, 유행), modest (겸손한 - 선을 지키는), moderate (적당한)" },
-      { id: 42, word: "contemporary", meaning: "동시대의, 현대의, 당대의", prefix: "con- (함께) + tempor- (시간, 때)", root: "contemporaneus (라틴어: 같은 날씨와 세월을 공유하는)", story: "역사의 거대한 시계태엽 장치 속에서 동일한 시간(tempo)대를 등 기울여 함께 살아가고 있는 역사적 동기이자 당대의 인물들을 뜻합니다.", related: "temporary (임시의), tempo (속도, 박자), tense (시제)" },
-      { id: 43, word: "urgent", meaning: "긴급한, 시급한", prefix: "urg- (앞으로 세차게 밀다)", root: "urgere (라틴어: 지체 없이 하도록 목을 조르다, 압박하다)", story: "뒤에서 무서운 기세로 엉덩이를 밀어붙이거나 목을 조르듯이, 단 1초도 뒤로 미루지 못하고 당장 처리해야 할 만큼 불꽃 튀는 상황입니다.", related: "urge (강력히 권고하다), urgency (긴급 상황)" },
-      { id: 44, word: "relevant", meaning: "관련된, 적절한, 유의미한", prefix: "re- (다시) + lev- (가볍게 들어 올리다)", root: "relevare (라틴어: 무거운 짐을 들어주어 도움을 유발하다)", story: "지금 논의 중인 쟁점 바구니 안에 '다시 들어 올려서 담을 만한 가치가 충분히 있을 정도로' 직접 연관성이 긴밀한 상태입니다.", related: "relieve (경감시키다), elevate (높이다), lever (지레)" },
-      { id: 45, word: "explicit", meaning: "분명한, 명백한, 솔직한", prefix: "ex- (바깥으로) + plic- (천을 접다)", root: "explicare (라틴어: 접혀 있던 구겨진 천을 완전히 활짝 펴다)", story: "속뜻이 무엇인지 보이지 않게 안으로 구부려 접어놓은 부분을 바깥으로(ex) 탈탈 털어 다 펼쳐놓았으니 숨김없이 너무나 투명하고 뚜렷합니다.", related: "imply (암시하다 - 안으로 접다), complicate (복잡하게 하다), apply (적용하다)" },
-      { id: 46, word: "approve", meaning: "승인하다, 찬성하다, 인가하다", prefix: "ad- (to) + prob- (테스트하여 증명하다)", root: "approbare (라틴어: 시험을 거쳐 쓸 만한 좋은 것이라 인정하다)", story: "제출된 기획안이나 사람의 됨됨이를 꼼꼼히 검증(prove)해 본 결과, '이 정도면 아주 훌륭하다'고 판단하여 도장을 쾅 찍어주는 행위입니다.", related: "prove (증명하다), proof (증거), probation (수습 기간)" },
-      { id: 47, word: "confront", meaning: "맞서다, 직면하게 만들다", prefix: "con- (서로 함께) + front- (이마, 얼굴)", root: "confrontare (중세 라틴어: 두 사람의 이마를 서로 바짝 맞대다)", story: "무섭거나 곤란한 적을 마주했을 때 등 돌려 도망치지 않고, 서로의 이마와 눈(front)을 정면으로 똑바로 들이대며 꼿꼿이 대항하는 그림입니다.", related: "front (앞면), frontier (국경, 개척지)" },
-      { id: 48, word: "poverty", meaning: "가난, 빈곤", prefix: "pov- (부족한, 가난한)", root: "pauper (라틴어: 수확물이 거의 없어 굶주리는 사람)", story: "토지가 척박하여 밭을 일구어도 먹을 수 있는 소출이 거의 안 나오는 비참한 결핍 상태에서 유래한 단어입니다.", related: "pauper (부랑자, 극빈자), poor (가난한)" },
-      { id: 49, word: "wealth", meaning: "부, 재산, 풍부", prefix: "weal- (몸이 편안하고 안락한 상태) + th (명사형 접미사)", root: "고대 영어 기반 단어", story: "몸이 아픈 데 없이 편안하고 행복하게 잘 지내는 상태(well)를 유지하기 위해 필수적으로 요구되는 풍요로운 물질적 재화를 가리킵니다.", related: "well (잘, 건강한), commonwealth (국가 공동체), weal (복지)" },
-      { id: 50, word: "integrate", meaning: "통합하다, 통합되다", prefix: "integr- (상처 없이 온전한, 전체의)", root: "integrare (라틴어: 파편들을 모아 흠집 없는 완전체로 만들다)", story: "여기저기 깨지고 쪼개져서 흩어진 소수 집단이나 조각들을 융합하여, 아무 상처가 없는 하나의 거대한 덩어리로 묶어 세우는 과정입니다.", related: "integrity (진실성, 청렴 - 온전함), entire (전체의)" },
-      { id: 51, word: "destructive", meaning: "파괴적인", prefix: "de- (아래로, 반대) + struct- (벽돌을 쌓다)", root: "destruere (라틴어: 공들여 쌓아 올린 건축물을 바닥으로 다 허물다)", story: "오랜 시간 땀 흘려 차곡차곡 쌓아 올린 구조물(structure)을 아래로(de) 가차 없이 부수어 먼지로 돌려버리는 격렬한 성질을 뜻합니다.", related: "destroy (파괴하다), structure (구조), construct (건설하다)" },
-      { id: 52, word: "hierarchy", meaning: "위계, 계급(제), 지배층", prefix: "hiero- (신성한 신의) + archy (지배, 통치)", root: "hierarchia (그ريس어: 하늘의 천사들과 신관 사제들의 엄격한 계급)", story: "고대 종교 의식에서 최고 사제부터 최하위 사제까지 신성한 규칙에 따라 엄격하게 피라미드식으로 구분해 놓은 서열 구조가 사회 제도로 정착했습니다.", related: "monarch (군주), anarchy (무정부 상태), architect (건축가 - 우두머리 장인)" },
-      { id: 53, word: "expertise", meaning: "전문 지식[기술]", prefix: "ex- (밖으로) + peri- (몸소 시도하다)", root: "expertus (라틴어: 수많은 테스트를 거쳐 숙련됨)", story: "방안에 앉아 말로만 하는 게 아니라, 수천 번 실제 시도와 실험(experiment)을 해보아 밖으로 실력이 증명된 전문가만의 깊이 있는 칼날 같은 노하우입니다.", related: "expert (전문가), experience (경험), experiment (실험)" },
-      { id: 54, word: "reproduce", meaning: "복제하다, 재생하다, 번식하다", prefix: "re- (다시) + pro- (앞으로) + duc- (줄을 지어 이끌다)", root: "reproducere (라틴어: 기존의 존재와 똑같은 것을 세상 앞에 다시 내놓다)", story: "인간이 물건을 똑같이 복사해 내거나, 생물체가 유전 정보를 똑같이 이어받은 새끼를 세상 앞으로(pro) 다시(re) 인도해 내는 행위입니다.", related: "produce (생산하다), conduct (인도하다, 지휘하다), reduce (줄이다)" },
-      { id: 55, word: "frequency", meaning: "빈도, 빈번함, 주파수", prefix: "frequ- (사람들로 빽빽하게 가득 찬, 붐비는)", root: "frequentia (라틴어: 좁은 시장 광장에 군중이 밀집함)", story: "지정된 시간และ 공간의 틀 안에서 어떠한 사건이나 파동의 물결이 얼마나 촘촘하고 빽빽하게(crowded) 연이어 일어나는가의 횟수입니다.", related: "frequent (자주 일어나는, 빈번한)" },
-      { id: 56, word: "identical", meaning: "동일한, 일치하는", prefix: "idem (바로 그것, 똑같은 것)", root: "identicus (중세 라틴어: 구별점이 없이 완벽히 일치하는)", story: "두 개의 대상을 눈앞에 두고 아무리 비교해 보아도 겉모습이나 본질에서 털끝만큼의 차이도 찾아낼 수 없는 일란성 쌍둥이 같은 상태입니다.", related: "identity (정체성), identify (확인하다, 동일시하다)" },
-      { id: 57, word: "reinforce", meaning: "강화하다, 증강하다, 보강하다", prefix: "re- (다시) + in- (안으로) + force (강력한 힘)", root: "renforcer (프랑스어: 허술한 성벽 내부에 힘을 다시 불어넣다)", story: "무너지기 직전의 연약한 뼈대나 적군에게 밀리는 군대 안으로(in) 강인한 아군 자원과 힘을 다시(re) 쏟아부어 견고하게 다지는 공정입니다.", related: "force (힘), enforce (집행하다), forceful (강력한)" },
-      { id: 58, word: "strengthen", meaning: "강화하다, 견고히 하다", prefix: "streng- (팽팽하게 당겨진, 단단한) + th (명사형) + en (만들다)", root: "고대 영어 기반 단어", story: "느슨하게 풀려 있던 줄을 양쪽에서 세게 잡아당겨 단단하고 팽팽한 힘의 상태(strength)가 되도록 강제적으로 구축해 주는 일입니다.", related: "strong (강한), strength (힘), strictly (엄격하게)" },
-      { id: 59, word: "industrial", meaning: "산업의, 공업의", prefix: "industr- (내면에서 솟구치는 부지런함)", root: "industria (라틴어: 뚜렷한 목표를 향해 근면하게 일함)", story: "인간이 목적의식을 가지고 공장에서 기계를 돌려 부지런히 제품을 만들고 부를 창출해 내는 대규모 경제 시스템의 속성입니다.", related: "industry (산업, 근면), industrious (근면 성실한)" },
-      { id: 60, word: "classify", meaning: "분류하다, 구분하다", prefix: "class- (부류, 계급, 집단) + fy (만들다)", root: "classis (라틴어: 함대 선박 징집을 위한 시민의 재산 등급)", story: "고대 로마에서 세금을 매기기 위해 재산 상태가 비슷한 시민들끼리 묶어 '등급(class)'을 만들던 행위에서 사물을 종류별로 나누다로 확장되었습니다.", related: "class (학급, 계급), classic (고전적인 - 최고 등급의)" },
-      { id: 61, word: "mutual", meaning: "상호 간의, 서로의, 공동의", prefix: "mut- (변화하다, 물건을 주고받다)", root: "mutuus (라틴어: 네 것과 내 것을 서로 빌려주고 보답하는)", story: "어느 한쪽만 일방적으로 명령하고 주는 게 아니라, 너와 내가 동등한 위치에서 혜택과 마음을 똑같이 주거니 받거니 맞바꾸는 성질입니다.", related: "mutate (돌연변이하다), commute (통근하다 - 정기적으로 교통권을 바꾸다)" },
-      { id: 62, word: "decorate", meaning: "장식하다, 꾸미다", prefix: "decor- (아름다움, 격식에 알맞음)", root: "decorare (라틴어: 보는 사람에게 품위와 품격이 있어 보이게 치장하다)", story: "장식하는 것을 넘어, 축하 행사의 격식이나 장소의 용도에 완벽히 어울리도록 조화로운 소품을 배치해 예쁘게 다듬는 행위입니다.", related: "decoration (장식물), decorum (예의범절, 단정함)" },
-      { id: 63, word: "potential", meaning: "잠재적인, 가능성 있는, 잠재력", prefix: "pot- (가장 강력한 힘, 권력)", root: "potentia (라틴어: 내면에 응축되어 숨겨진 거대한 에너지)", story: "지금 당장은 눈앞에 마그마처럼 분출되지 않았지만, 언제든 조건만 맞으면 화산처럼 폭발해 나올 수 있는 내면의 숨은 그릇과 파워입니다.", related: "potent (강력한), impotent (무능력한), omnipotent (전지전능한)" },
-      { id: 64, word: "possibility", meaning: "가능성, 실현성", prefix: "poss- (주인의 권리가 있어 무엇이든 능히 할 수 있다)", root: "possibilis (라틴어: 현실 세계에서 실행에 옮길 수 있는)", story: "머릿속 허황된 상상에 그치지 않고, 물리적인 법칙이나 인간의 힘을 바탕으로 실제로 역사 속에 일어날 수 있는 확률적 가치를 말합니다.", related: "possible (가능한), possess (소유하다 - 주인으로서 앉다), power (힘)" },
-      { id: 65, word: "implement", meaning: "이행하다, 실행하다, 도구", prefix: "in- (안에) + ple- (물이나 내용물을 가득 채우다)", root: "implementum (라틴어: 빈 곳을 꽉 채워 일을 완성할 도구)", story: "약속이나 서류 위에 머물던 공허한 계획에 구체적인 행동과 실행의 알맹이를 집어넣어, 내부를 '빈틈없이 꽉 채워(fill)' 마무리를 짓는 모션입니다.", related: "complete (완성하다), complement (보완하다), plenty (풍부한)" },
-      { id: 66, word: "widespread", meaning: "널리 퍼진, 광범위한", prefix: "wide (넓은 경계) + spread (날개를 펴서 흩뿌리다)", root: "고대 영어 복합어", story: "작고 좁은 우물 안 공간에 갇혀 있지 않고, 새가 날개를 활짝 펴서 씨앗을 사방으로 뿌리듯 아주 방대한 영토에 걸쳐 넓게 번진 상태입니다.", related: "width (너비), spreadsheet (스프레드시트)" },
-      { id: 67, word: "resemble", meaning: "닮다, 유사하다", prefix: "re- (다시, 강조) + sembl- (똑같은, 비슷한 모양)", root: "resimulare (라틴어: 어떤 오리지널 대상을 거울처럼 똑같이 흉내 내다)", story: "유전적 요인이나 시각적 특징 때문에, 어떤 사람을 쳐다보았을 때 다른 오리지널 대상의 얼굴 이미지가 머릿속에 '다시 겹쳐 떠오를' 만큼 비슷합니다.", related: "similar (유사한), simulate (시뮬레이션하다), assemble (모으다 - 비슷하게 정렬하다)" },
-      { id: 68, word: "fundamental", meaning: "근본적인, 본질적인, 필수적인", prefix: "fund- (건물의 바닥, 땅속 깊은 곳)", root: "fundamentum (라틴어: 건물이 쓰러지지 않게 받쳐주는 땅속 주춧돌)", story: "화려한 지붕이나 창문이 아니라, 그 무거운 건축물이 수백 년 동안 땅에 굳건히 서 있도록 가장 밑바닥에서 지탱하는 주춧돌처럼 중요한 가치입니다.", related: "foundation (토대), fund (기금, 자금), profound (심오한 - 깊은 바닥의)" },
-      { id: 69, word: "enthusiastic", meaning: "열정적인, 열렬한", prefix: "en- (안에) + theos (종교 신, 절대자)", root: "enthousiasmos (그리스어: 영혼 속에 신이 직접 들어와 신들린 상태)", story: "종교적 광기나 황홀경처럼, 자기 영혼의 방 안에 우주의 신(theos)이 직접 걸어 들어와 영감을 불어넣은 듯 영혼을 펄펄 끓여 열정을 바치는 상태입니다.", related: "theology (신학), atheist (무신론자)" },
-      { id: 70, word: "consult", meaning: "상담하다, 상의하다, 참고하다", prefix: "con- (서로 함께) + sult- (조언을 구하러 사방으로 뛰다)", root: "consulere (라틴어: 중대한 결정을 내리기 위해 현자들을 한방에 불러 모으다)", story: "혼자 끙끙 앓으며 독단적으로 결정하지 않고, 지혜를 가진 전문가들을 한자리에 불러서(call) 머리를 맞대고 진지하게 대책을 상의하는 행동입니다.", related: "consultant (컨설턴트), counsel (상담, 조언)" },
-      { id: 71, word: "disadvantage", meaning: "단점, 약점, 불이익", prefix: "dis- (반대, 빼기) + ad- (to) + vant- (남들보다 앞서서 나아가다)", root: "고대 프랑스어 기반 계승", story: "달리기 시합을 할 때 다른 주자들보다 앞줄에 서서 유리하게 출발하는 고지(advantage)를 반대로(dis) 박탈당해 발목이 잡힌 불리한 조건입니다.", related: "advantage (이점), advance (전진하다), van (선발대)" },
-      { id: 72, word: "drawback", meaning: "단점, 결점, 장애", prefix: "draw (앞으로 줄을 당기다) + back (등 뒤 방향으로)", root: "게르만 언어 구어 유래", story: "마치 밧줄을 묶고 힘차게 앞으로 전진하려 하는데, 거대한 결점이나 방해 요소가 내 옷자락을 '등 뒤 방향으로(back) 세게 잡아당겨(draw)' 지체시키는 방해물입니다.", related: "drawer (서랍), withdraw (철수하다, 인출하다)" },
-      { id: 73, word: "steady", meaning: "꾸준한, 한결같은", prefix: "sted- (고정된 자리, 위치) + y (형용사형 접미사)", root: "stede (고대 영어: 발을 단단히 붙이고 확고히 서 있는 자리)", story: "바람이 거세게 불거나 비바람이 몰아쳐도 자기가 서 있기로 맹세한 그 원래 자리(stand)에서 한 치도 흔들림 없이 한결같이 버티는 신뢰감을 묘사합니다.", related: "instead (대신에 - 그 자리에), stand (서다), station (정거장)" },
-      { id: 74, word: "primitive", meaning: "원시의, 원시적인", prefix: "prim- (순서상 맨 처음의, 제1의)", root: "primitivus (라틴어: 인류 문명이 태동하던 아주 초기 단계의)", story: "과학 기술이나 정교한 도구가 고도로 발달하기 전, 지구상에 가장 맨 처음(prime) 등장했던 인류 조상들의 거칠고 투박한 생활 양식을 상기시킵니다.", related: "prime (최고의, 주요한), primary (초등의, 주요한), prince (왕자)" },
-      { id: 75, word: "dominant", meaning: "우세한, 지배적인", prefix: "dom- (지붕이 있는 집, 영토, 지배)", root: "dominari (라틴어: 거대한 집안의 가부장 주인이 되어 노예를 호령하다)", story: "한 가정의 절대 권력을 쥔 가부장 주인(dominus)처럼, 압도적인 힘의 우위를 점하고 주변의 모든 나약한 요소를 자기 손아귀에 넣고 흔드는 기세입니다.", related: "dominate (지배하다), domain (영역, 영토), domestic (국내의, 가정의)" },
-      { id: 76, word: "inhabit", meaning: "거주하다, 살다", prefix: "in- (공간의 내부에) + hab- (반복하여 소유하다, 머무르다)", root: "inhabitare (라틴어: 특정한 환경을 내 집으로 삼아 상주하다)", story: "동식물이나 인간이 특정한 숲이나 도시 공간 내부(in)를 자기 영토로 완전히 삼아, 오랜 세월 반복적으로 머물며 생활을 영위하는 행위입니다.", related: "habit (습관 - 몸에 밴 것), habitat (서식지), exhibit (전시하다 - 밖으로 내놓다)" },
-      { id: 77, word: "adolescence", meaning: "청소년기", prefix: "ad- (성인을 향해) + olesc- (신체와 정신이 무럭무럭 자라나다)", root: "adolescere (라틴어: 어린아이의 티를 벗고 어른을 향해 폭풍 성장하다)", story: "단순히 나이를 먹는 것을 넘어, 아동기의 미숙함을 졸업하고 독립적인 성인(adult)이라는 사회적 고지를 향해 몸과 마음이 격렬하게 자라는 과도기입니다. ", related: "adult (성인), abolish (폐지하다 - 자라는 것을 멈추다)" },
-      { id: 78, word: "attach", meaning: "붙이다, 첨부하다", prefix: "ad- (to) + tach- (나무 말뚝, 고정용 핀)", root: "atachier (고대 프랑스어: 끈이나 핀을 꽂아 고정하다)", story: "물건이 바람에 날아가거나 잃어버리지 않도록, 자석이나 고정 핀(stake)을 이용하여 목적지 벽면에 찰떡같이 착 달라붙여 매달아 놓는 모션입니다.", related: "detach (떼어내다), attack (공격하다 - 말뚝을 박아 치다)" },
-      { id: 79, word: "in terms of", meaning: "~의 관점에서, ~에 관해서", prefix: "termin- (땅의 경계선, 한계 한계 값)", root: "terminus (라틴어: 경계를 표시하는 로마의 종말의 신)", story: "사물을 무제한으로 바라보는 게 아니라, 한정된 특정한 조건의 경계선(term)의 울타리 안으로 시선을 가두어 그 한계 기준에서 논의한다는 수거입니다.", related: "term (용어, 기간), terminal (종착역), determine (결정하다 - 경계를 짓다)" },
-      { id: 80, word: "bring about", meaning: "~을 야기[초래]하다", prefix: "bring (손으로 잡아 가져오다) + about (내 몸의 주변 둘레에)", root: "고대 영어 기반 숙어", story: "전혀 예상치 못했던 새로운 사건이나 특정한 결과물을, 내가 살고 있는 내 주변(around) 공간 안으로 직접 손으로 끌고 들어와 벌어지게 만들다라는 뜻입니다.", related: "bring, about" }
-    ];
-
-    function App() {
-      const [activeTab, setActiveTab] = useState("list"); // list 또는 card
-      const [currentIndex, setCurrentIndex] = useState(0);
-      const [searchQuery, setSearchQuery] = useState("");
-      const [bookmarked, setBookmarked] = useState(new Set());
-      const [memorized, setMemorized] = useState(new Set());
-      const [showMeaning, setShowMeaning] = useState(true);
-      const [filterMode, setFilterMode] = useState("all");
-      const [isPlaying, setIsPlaying] = useState(false);
-      const [speechRate, setSpeechRate] = useState(0.9);
-      const autoPlayTimer = useRef(null);
-
-      // 영어 발음 청취 TTS
-      const playPronunciation = (text) => {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const clean = text.replace(/-ing/g, '').trim();
-          const u = new SpeechSynthesisUtterance(clean);
-          u.lang = 'en-US'; u.rate = speechRate;
-          window.speechSynthesis.speak(u);
-        }
-      };
-
-      // 한국어 뜻 청취 TTS
-      const playMeaning = (text) => {
-        if ('speechSynthesis' in window) {
-          window.speechSynthesis.cancel();
-          const clean = text.replace(/[\(\)·\[\]~]/g,'');
-          const u = new SpeechSynthesisUtterance(clean);
-          u.lang = 'ko-KR'; u.rate = 1.0;
-          window.speechSynthesis.speak(u);
-        }
-      };
-
-      // 필터 및 검색 처리
-      const filteredWords = useMemo(() => {
-        return WORDS.filter(item => {
-          const q = searchQuery.toLowerCase();
-          const match = item.word.toLowerCase().includes(q) || 
-                        item.meaning.includes(searchQuery) ||
-                        (item.related && item.related.toLowerCase().includes(q)) ||
-                        (item.root && item.root.toLowerCase().includes(q));
-          if (!match) return false;
-          if (filterMode === "bookmarked") return bookmarked.has(item.id);
-          if (filterMode === "not_memorized") return !memorized.has(item.id);
-          return true;
-        });
-      }, [searchQuery, filterMode, bookmarked, memorized]);
-
-      const currentWord = filteredWords[currentIndex] || filteredWords[0] || null;
-
-      const handleNext = () => {
-        if (!filteredWords.length) return;
-        setCurrentIndex(p => (p + 1) % filteredWords.length);
-        setShowMeaning(true);
-      };
-
-      const handlePrev = () => {
-        if (!filteredWords.length) return;
-        setCurrentIndex(p => (p - 1 + filteredWords.length) % filteredWords.length);
-        setShowMeaning(true);
-      };
-
-      useEffect(() => {
-        setCurrentIndex(0); setShowMeaning(true);
-      }, [filterMode, searchQuery]);
-
-      // 데스크톱 키보드 단축키 호환 바인딩
-      useEffect(() => {
-        const handler = (e) => {
-          if (e.target.tagName === 'INPUT' || e.target.tagName === 'SELECT') return;
-          if (e.key === 'ArrowRight') handleNext();
-          else if (e.key === 'ArrowLeft') handlePrev();
-          else if (e.key === ' ') { e.preventDefault(); setShowMeaning(p => !p); }
-        };
-        window.addEventListener('keydown', handler);
-        return () => window.removeEventListener('keydown', handler);
-      }, [currentIndex, filteredWords]);
-
-      // 자동 스트리밍 학습 타이머 동작
-      useEffect(() => {
-        if (isPlaying && currentWord) {
-          playPronunciation(currentWord.word);
-          autoPlayTimer.current = setTimeout(() => {
-            if (showMeaning) playMeaning(currentWord.meaning);
-            autoPlayTimer.current = setTimeout(handleNext, 4200);
-          }, 1800);
-        }
-        return () => clearTimeout(autoPlayTimer.current);
-      }, [isPlaying, currentIndex, currentWord, showMeaning]);
-
-      const toggleBookmark = (id) => setBookmarked(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
-      const toggleMemorized = (id) => setMemorized(p => { const n = new Set(p); n.has(id) ? n.delete(id) : n.add(id); return n; });
-
-      return (
-        <div class="h-screen flex flex-col bg-[#0b0f19] text-slate-200 select-none overflow-hidden">
-          
-          {/* TOP HEADER */}
-          <div class="relative bg-[#0f172a] px-4 pt-4 pb-3 border-b border-slate-800/80 flex-shrink-0">
-            <div class="absolute inset-x-0 top-0 h-1 stripe-blue"></div>
-            <div class="flex items-center justify-between">
-              <div>
-                <div class="flex items-center gap-1.5">
-                  <span class="px-1.5 py-0.5 bg-sky-600 text-white font-black text-[9px] rounded mono tracking-wider">ZEBRA</span>
-                  <span class="text-[10px] text-sky-400 font-bold mono">고등 BASIC [11-12과]</span>
-                </div>
-                <h1 class="text-sm font-bold text-white mt-0.5">워마 통합 어원 단어장</h1>
-              </div>
-              <div class="text-right">
-                <span class="text-[10px] text-slate-500 block mono">암기 진도</span>
-                <span class="text-xs font-bold text-sky-400 mono">{memorized.size} <span class="text-[10px] text-slate-600">/ {WORDS.length}</span></span>
-              </div>
-            </div>
-
-            {/* PROGRESS BAR */}
-            <div class="w-full h-1 bg-slate-800 rounded-full mt-3 overflow-hidden">
-              <div class="h-full bg-gradient-to-r from-sky-500 to-cyan-400 rounded-full transition-all duration-300"
-                style={{ width: `${(memorized.size / WORDS.length) * 100}%` }}></div>
-            </div>
-          </div>
-
-          {/* MAIN CONTENTS CONTAINER */}
-          <div class="flex-1 overflow-hidden relative bg-[#0b0f19]">
+        <main class="flex-1 p-4 overflow-y-auto">
             
-            {/* 1. LIST VIEW TAB */}
-            {activeTab === "list" && (
-              <div class="h-full flex flex-col fade-in">
-                {/* Filters */}
-                <div class="p-2 bg-[#0e1526] border-b border-slate-800/50 grid grid-cols-3 gap-1">
-                  {[["all","전체","text-slate-300"],["bookmarked","★ 북마크","text-amber-400"],["not_memorized","미암기","text-sky-400"]].map(([mode, label, color]) => (
-                    <button key={mode} onClick={() => setFilterMode(mode)}
-                      class={`py-1.5 text-xs rounded-lg font-medium transition-all ${filterMode === mode ? "bg-sky-950/40 border border-sky-500/50 " + color : "text-slate-500 hover:bg-slate-900"}`}>
-                      {label}
-                    </button>
-                  ))}
-                </div>
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-center">
+                <p class="text-xs font-semibold text-amber-800">🔄 실행할 때마다 단어 순서가 무작위로 자동 설정됩니다.</p>
+            </div>
 
-                {/* Search Bar */}
-                <div class="p-2 bg-[#0b0f19] border-b border-slate-900 relative">
-                  <input type="text" placeholder="단어·뜻·어근·동계어 입체 검색..."
-                    value={searchQuery}
-                    onChange={e => setSearchQuery(e.target.value)}
-                    class="w-full pl-8 pr-3 py-1.5 bg-[#131b2e] border border-slate-800 rounded-lg text-xs text-slate-200 placeholder-slate-600 focus:outline-none focus:border-sky-500 transition-colors"
-                  />
-                  <span class="absolute left-4 top-3.5 text-slate-600 text-xs">⌕</span>
+            <div class="flex justify-between items-center mb-4">
+                <button onclick="reshuffleWords()" class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition shadow-sm">🎲 다시 섞기</button>
+                <div class="flex gap-2 text-xs font-medium">
+                    <button onclick="switchMode('list')" id="mode-list" class="px-3 py-1.5 rounded-full bg-slate-800 text-white shadow">목록 보기</button>
+                    <button onclick="switchMode('card')" id="mode-card" class="px-3 py-1.5 rounded-full bg-slate-200 text-slate-700">카드 학습</button>
                 </div>
+            </div>
 
-                {/* Word Scroll List */}
-                <div class="flex-1 overflow-y-auto divide-y divide-slate-900/60 pb-12">
-                  {filteredWords.length === 0 ? (
-                    <div class="p-12 text-center text-xs text-slate-600 mono">검색 조건에 맞는 단어가 없습니다.</div>
-                  ) : filteredWords.map((item, idx) => {
-                    const isM = memorized.has(item.id);
-                    const isB = bookmarked.has(item.id);
-                    return (
-                      <div key={item.id}
-                        onClick={() => { setCurrentIndex(idx); setShowMeaning(true); setActiveTab("card"); }}
-                        class="p-3.5 cursor-pointer flex items-center justify-between bg-[#0b0f19] hover:bg-[#0f1626] active:bg-[#0f1626] transition-colors">
-                        <div class="min-w-0 pr-4">
-                          <div class="flex items-center gap-1.5">
-                            <span class="text-[10px] mono text-slate-600">{item.id}.</span>
-                            <span class={`font-bold text-sm tracking-tight ${isM ? "text-slate-600 line-through decoration-slate-700" : "text-slate-200"}`}>{item.word}</span>
-                          </div>
-                          <p class={`text-xs mt-1 truncate ${isM ? "text-slate-600" : "text-slate-400"}`}>{item.meaning}</p>
-                        </div>
-                        <div class="flex gap-2" onClick={e => e.stopPropagation()}>
-                          <button onClick={() => toggleBookmark(item.id)}
-                            class={`p-2 text-sm transition-colors rounded-lg ${isB ? "text-amber-400 bg-amber-500/5" : "text-slate-700"}`}>★</button>
-                          <button onClick={() => toggleMemorized(item.id)}
-                            class={`p-2 text-sm transition-colors rounded-lg ${isM ? "text-sky-400 bg-sky-500/5" : "text-slate-700"}`}>✔</button>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            )}
+            <div id="vocab-container" class="space-y-3 pb-4"></div>
 
-            {/* 2. CARD STUDY TAB (WITH SCROLLABLE ETYMO) */}
-            {activeTab === "card" && (
-              <div class="h-full flex flex-col p-4 justify-between overflow-y-auto pb-16 fade-in">
+        </main>
+
+        <footer class="bg-slate-50 border-t border-slate-200 p-3 text-center text-xs text-slate-500 z-10" id="app-footer">
+            <div id="footer-content" class="w-full">© 얼룩말영어학원 | 스마트 단어 학습 시스템</div>
+        </footer>
+    </div>
+
+    <script>
+        // 고등 BASIC 13과 단어 및 뜻 원본 데이터
+        const originalData = [
+            { word: "endure", meaning: "견디다, 참다", etymology: "en-(안에) + 라틴어 durus(단단한). 거친 환경이나 고통 속에서도 마음을 단단하게 유지하며 버티다.", cognates: "endurance (인내), endurable (견딜 수 있는)" },
+            { word: "compassion", meaning: "동정, 연민", etymology: "com-(함께) + 라틴어 pati(고통을 겪다). 타인이 겪는 고통과 비극적인 슬픔을 가슴 깊이 함께 느끼는 마음.", cognates: "compassionate (동정심이 많은)" },
+            { word: "jealous", meaning: "질투하는", etymology: "그리스어 zelos(열정, 시기)에서 파생됨. 남이 가진 좋은 것을 시샘하거나 탐내며 타오르는 감정 상태.", cognates: "jealousy (질투)" },
+            { word: "reluctant", meaning: "(마음이) 내키지 않는, 꺼리는", etymology: "re-(반대하여) + 라틴어 luctari(싸우다, 저항하다). 특정 행동을 요구받았을 때 마음속으로 강하게 저항하며 주저하는.", cognates: "reluctance (꺼림, 마지못해 함)" },
+            { word: "astonished", meaning: "깜짝 놀란", etymology: "라틴어 ex-(밖으로) + tonare(천둥 치다)의 결합형. 갑자기 천둥을 맞아 정신이 나갈 정도로 크게 놀란 상태.", cognates: "astonish (깜짝 놀라게 하다), astonishment (놀람)" },
+            { word: "ridiculous", meaning: "터무니없는, 어리석은, 우스운", etymology: "라틴어 ridere(웃다)에서 파생. 이치에 전혀 맞지 않아 공개적인 비웃음거리나 조롱거리로 만들 만한 상태.", cognates: "ridicule (조롱하다, 비웃다)" },
+            { word: "empathy", meaning: "감정 이입, 공감", etymology: "em-(안에) + pathos(감정, 고통). 자신을 타인의 상황 속에 완벽히 밀어 넣어 그 내면의 슬픔과 감정을 고스란히 느끼는 과정.", cognates: "empathize (공감하다), empathetic (공감하는)" },
+            { word: "generous", meaning: "관대한, 후한", etymology: "라틴어 genus(고귀한 태생, 가문). 과거 귀족적인 성품으로 타인에게 너그럽고 재물을 아낌없이 베푸는 양상에서 유래.", cognates: "generosity (너그러움, 관대함)" },
+            { word: "anticipate", meaning: "기대하다, 예상하다", etymology: "anti-(앞서서) + 라틴어 capere(잡다). 다가올 미래의 일이나 결과를 시간적으로 미리 머릿속으로 움켜쥐어 생각하다.", cognates: "anticipation (예상, 기대)" },
+            { word: "miserable", meaning: "비참한, 불쌍한", etymology: "라틴어 miser(불쌍하고 가련한 상태)에서 유래. 물질적 혹은 정신적으로 온전한 보호를 받지 못해 지독하게 황폐해진 상태.", cognates: "misery (비참함, 고통)" },
+            { word: "arouse", meaning: "불러일으키다, 유발하다, 깨우다", etymology: "a-(강조) + rouse(잠에서 깨우다). 깊이 잠들어 있거나 고요한 감정, 의식, 자극을 밖으로 강하게 흔들어 깨우는 행위.", cognates: "rouse (깨우다)" },
+            { word: "confident", meaning: "자신감 있는, 확신하는", etymology: "con-(완전히) + 라틴어 fidere(믿다). 자신의 능력이나 어떤 사실의 진위 여부에 대해 의심 없이 완벽하게 신뢰하는.", cognates: "confidence (자신감, 신뢰), confide (비밀을 털어놓다)" },
+            { word: "irritate", meaning: "짜증나게[화나게] 하다, 거슬리다", etymology: "라틴어 irritare(흥분시키다, 자극하다). 피부 표면이나 내면의 평화로운 감정을 지속적으로 긁어 신경질을 유발하는 행위.", cognates: "irritation (짜증, 자극), irritable (화가 잘 나는)" },
+            { word: "humble", meaning: "겸손한, 비천한", etymology: "라틴어 humus(흙, 땅바닥)에서 유래. 자신을 높이지 않고 가장 낮은 땅바닥 수준으로 내리는 성품 혹은 사회적 신분.", cognates: "humility (겸손), humbleness (겸손함)" },
+            { word: "despair", meaning: "절망, 절망하다", etymology: "de-(부정/없이) + 라틴어 sperare(희망을 품다). 눈앞의 미래에서 의지할 수 있는 가느다란 희망의 불씨가 완전히 사라진 상태.", cognates: "desperate (필사적인, 절망적인)" },
+            { word: "make sense of", meaning: "~을 이해하다, ~을 파악하다", etymology: "make(만들다) + sense(이치, 의미) + of. 복잡하게 뒤엉켜 이해되지 않는 사실에서 올바른 논리적 인과관계를 도출해 내다.", cognates: "sense (감각, 이성)" },
+            { word: "crawl", meaning: "기어가다, 서행하다, 기어가기, 서행", etymology: "고대 노르드어 krafla(손발로 짚으며 나아가다)에서 유래. 몸을 바닥에 밀착시키거나 바퀴를 아주 느리게 굴려 움직이는 양상.", cognates: "crawler (기어가는 것, 크롤러)" },
+            { word: "impulse", meaning: "충동", etymology: "in-(안으로) + 라틴어 pellere(밀어붙이다). 이성적으로 깊이 생각하기 전에 가슴속 깊은 곳에서 행동을 하라고 강하게 등 떠미는 힘.", cognates: "impulsive (충동적인), compel (강요하다)" },
+            { word: "ashamed", meaning: "부끄러워하는", etymology: "a-(강조) + 고대 영어 scamu(수치심). 사회적 규범이나 스스로 세운 도덕적 기준을 만족하지 못해 내면에서 일어나는 부끄러움.", cognates: "shame (창피, 부끄러움)" },
+            { word: "hesitate", meaning: "주저하다, 망설이다", etymology: "라틴어 haerere(딱 달라붙어 멈춰 서다). 앞으로 나아가야 할 선택의 기로에서 결정을 내리지 못하고 한자리에 묶여 있는.", cognates: "hesitation (망설임), hesitant (주저하는)" },
+            { word: "arrogant", meaning: "거만한, 오만한", etymology: "ad-(~에게) + 라틴어 rogare(요구하다/주장하다). 자신이 지닌 가치 이상의 권리와 대접을 타인에게 무리하게 요구하며 뽐내는.", cognates: "arrogance (오만, 거만)" },
+            { word: "frustrated", meaning: "좌절감을 느끼는", etymology: "라틴어 frustra(헛되이, 쓸모없이)에서 파생. 목표를 달성하고자 온 힘을 쏟았으나 방해 요인에 가로막혀 노력이 무위로 돌아간 상태.", cognates: "frustrate (좌절시키다), frustration (좌절, 불만)" },
+            { word: "glance", meaning: "힐긋[얼핏] 보다, 힐긋 봄", etymology: "중세 영어 glansen(비스듬히 미끄러져 튕겨 나가다). 시선을 한곳에 고정하지 않고 표면을 스치듯 아주 잠깐 쳐다보는 행위.", cognates: "glancing (빗나가는)" },
+            { word: "fascinated", meaning: "매료된, 매혹된", etymology: "라틴어 fascinare(마법을 걸다, 주문을 외우다). 강력한 아름다움이나 가치에 마음을 사로잡혀 마치 마법에 걸린 듯 꼼짝 못 하는.", cognates: "fascinate (매혹시키다), fascinating (대단히 흥미로운)" },
+            { word: "responsible", meaning: "책임감 있는, 책임이 있는", etymology: "re-(다시) + 라틴어 spondere(엄숙하게 약속하다). 자신이 행한 결과나 의무에 대해 정당하게 대답하고 감당해 낼 의무가 존재하는.", cognates: "responsibility (책임), respond (대답하다)" },
+            { word: "genuine", meaning: "진짜의, 진실한", etymology: "라틴어 genu(무릎)에서 유래. 고대 로마에서 아버지가 갓 태어난 아기를 자신의 무릎 위에 올려 가문의 핏줄로 인정하던 관습.", cognates: "genuinely (진심으로)" },
+            { word: "impatient", meaning: "참을 수 없는, 성급한", etymology: "in-(부정/반대) + patient(참을성 있는). 약속된 시간이나 고통의 무게를 조용히 견디지 못하고 조급하게 구는 유약한 내면 상태.", cognates: "impatience (조급증), patient (환자, 참을성 있는)" },
+            { word: "applause", meaning: "박수갈채", etymology: "ad-(~에게) + 라틴어 plaudere(손뼉을 치다). 공연자나 훌륭한 성과를 낸 사람의 공로를 치하하기 위해 손바닥을 부딪치는 소리.", cognates: "applaud (칭찬하다, 박수를 보내다)" },
+            { word: "faithful", meaning: "충실한", etymology: "faith(믿음, 신념) + ful(~이 가득 찬). 자신이 맺은 조약, 군주, 종교적 신념에 대해 변절하지 않고 끝까지 신의를 지키는 상태.", cognates: "faith (믿음), faithfully (충실하게)" },
+            { word: "tolerate", meaning: "참다, 견디다, 용인하다", etymology: "라틴어 tolerare(무거운 짐을 짊어지고 버티다). 자신과 다른 가치관이나 불쾌한 상황을 배척하지 않고 너그럽게 품어주는 행위.", cognates: "tolerance (관용, 내성), tolerant (너거운)" },
+            { word: "humiliate", meaning: "창피를 주다, 굴욕감을 느끼게 하다", etymology: "라틴어 humilis(낮은, 겸손한)의 동사형. 타인의 자존심을 짓밟아 사회적인 신분이나 체면을 땅바닥 수준으로 떨어뜨려 수치심을 주다.", cognates: "humiliation (굴욕), humility (겸손)" },
+            { word: "frank", meaning: "솔직한, 숨김없는", etymology: "고대 게르만족 계열의 프랭크(Frank) 족 이름에서 유래. 지배층으로서 누렸던 '자유로운 신분'에서 '거짓 없이 자유롭게 말하는 성품'.", cognates: "frankly (솔직히 말해서)" },
+            { word: "offend", meaning: "감정을 상하게 하다, 위반하다", etymology: "ob-(~에 맞서서) + 라틴어 fendere(치다, 타격을 주다). 상대방의 경계선을 무리하게 침범하여 심리적 타격을 주거나 법을 깨부수다.", cognates: "offense (범죄, 공격), offensive (모욕적인)" },
+            { word: "eager", meaning: "열망하는, 열심인", etymology: "라틴어 acer(날카로운, 신랄한, 활기찬). 칼날이 예리하게 서 있는 것처럼 특정 목표를 달성하고자 하는 정신이 날카롭게 집중된.", cognates: "eagerness (열의, 열망)" },
+            { word: "sincere", meaning: "진실된, 진심의", etymology: "라틴어 sincerus(순수한, 섞이지 않은). 위선이나 거짓의 불순물이 섞이지 않은 상태에서 유래한 투명한 마음.", cognates: "sincerity (진실성, 성실)" },
+            { word: "depression", meaning: "우울(증), 불황", etymology: "de-(아래로) + press(누르다) + ion. 평온하던 내면의 정신세계나 역동적이던 사회적 경제 흐름을 바닥을 향해 꾹 짓눌러 꺼트린 상태.", cognates: "depress (우울하게 하다), depressive (우울증의)" },
+            { word: "put up with", meaning: "~을 참다, ~을 참고 견디다", etymology: "put(놓다) + up(완전히 위에) + with(~와 함께). 자신에게 주어지는 불쾌한 짐이나 대상을 거부하지 않고 완전히 짊어진 채 같이 가다.", cognates: "put (놓다)" },
+            { word: "awkward", meaning: "서투른, 어색한", etymology: "고대 노르드어 afgr(잘못된 방향을 향하는) + ward(방향 접미사). 물건을 다루거나 사람을 대할 때 조화롭지 못하고 삐딱하게 행동하는 양상.", cognates: "awkwardness (어색함)" },
+            { word: "resent", meaning: "화를 내다, 분개하다", etymology: "re-(강조/다시) + 라틴어 sentire(느끼다). 부당하고 가혹한 대우를 받았을 때 그 불쾌하고 나쁜 감정을 가슴속에서 계속 강하게 느끼며 표출하다.", cognates: "resentment (분개, 분노), resentful (억울해하는)" },
+            { word: "delight", meaning: "기쁨, 기쁘게 하다", etymology: "de-(완전히) + 라틴어 lacere(유혹하다, 끌어당기다). 아름다운 대상에 마음이 완전히 사로잡혀 극상의 영혼적 즐거움과 만족감을 느끼는 상태.", cognates: "delightful (아주 즐거운), delighted (기뻐하는)" }
+        ];
+
+        let shuffledData = [];
+        let currentMode = 'list';
+        let cardIndex = 0;
+
+        // Fisher-Yates 무작위 셔플 알고리즘
+        function shuffle(array) {
+            let currentIndex = array.length, randomIndex;
+            const newArray = [...array];
+            while (currentIndex != 0) {
+                randomIndex = Math.floor(Math.random() * currentIndex);
+                currentIndex--;
+                [newArray[currentIndex], newArray[randomIndex]] = [
+                newArray[randomIndex], newArray[currentIndex]];
+            }
+            return newArray;
+        }
+
+        // 수동/자동 재배치 제어 함수
+        function reshuffleWords() {
+            shuffledData = shuffle(originalData);
+            cardIndex = 0;
+            const cardInner = document.getElementById('card-inner');
+            if (cardInner) cardInner.classList.remove('card-flipped');
+            renderContent();
+        }
+
+        function switchMode(mode) {
+            currentMode = mode;
+            cardIndex = 0; 
+            const listBtn = document.getElementById('mode-list');
+            const cardBtn = document.getElementById('mode-card');
+
+            if(mode === 'list') {
+                listBtn.className = "px-3 py-1.5 rounded-full bg-slate-800 text-white shadow";
+                cardBtn.className = "px-3 py-1.5 rounded-full bg-slate-200 text-slate-700";
+            } else {
+                cardBtn.className = "px-3 py-1.5 rounded-full bg-slate-800 text-white shadow";
+                listBtn.className = "px-3 py-1.5 rounded-full bg-slate-200 text-slate-700";
+            }
+            renderContent();
+        }
+
+        function renderContent() {
+            const container = document.getElementById('vocab-container');
+            const footerContent = document.getElementById('footer-content');
+
+            if (currentMode === 'list') {
+                // 목록 모드일 때 푸터 내부를 원래 기본 텍스트로 격리 복원
+                footerContent.className = "w-full text-slate-400 text-center py-1";
+                footerContent.innerHTML = `© 얼룩말영어학원 | 스마트 단어 학습 시스템`;
                 
-                {/* Card Settings Bar */}
-                <div class="flex-shrink-0 flex items-center justify-between bg-[#0e1526] border border-slate-800/60 rounded-xl px-3 py-1.5 mb-3">
-                  <div class="text-[11px] font-bold text-slate-500 mono">
-                    CARD <span class="text-sky-400">{currentIndex + 1}</span> / {filteredWords.length}
-                  </div>
-                  <div class="flex items-center gap-2">
-                    <select value={speechRate} onChange={e => setSpeechRate(parseFloat(e.target.value))}
-                      class="bg-[#131b2e] text-[10px] mono text-slate-400 rounded border border-slate-800 px-1 py-0.5 focus:outline-none">
-                      <option value="0.7">0.7x</option>
-                      <option value="0.9">0.9x</option>
-                      <option value="1.1">1.1x</option>
-                    </select>
-                    <button onClick={() => setIsPlaying(p => !p)}
-                      class={`px-2.5 py-1 text-[10px] font-bold rounded-md transition-all ${isPlaying ? "bg-rose-600/90 text-white" : "bg-sky-600 text-white"}`}>
-                      {isPlaying ? "정지" : "▶ 자동"}
-                    </button>
-                  </div>
-                </div>
-
-                {/* Main Card View Space */}
-                <div class="w-full flex flex-col gap-4 items-center justify-start flex-1">
-                  {currentWord ? (
-                    <React.Fragment>
-                      
-                      {/* Flip Card Unit */}
-                      <div onClick={() => setShowMeaning(p => !p)} class="perspective-1000 w-full max-w-sm h-48 cursor-pointer relative flex-shrink-0">
-                        <div class={`w-full h-full duration-300 preserve-3d transition-transform relative ${!showMeaning ? "rotate-y-180" : ""}`}>
-                          
-                          {/* CARD FRONT (ENGLISH WORD) */}
-                          <div class="absolute w-full h-full bg-[#111827] border border-slate-800/80 rounded-2xl flex flex-col justify-between p-4 backface-hidden glow-cyan">
-                            <div class="flex justify-between items-center w-full">
-                              <span class="text-[9px] mono text-slate-600 font-bold tracking-wider uppercase">ENGLISH WORD</span>
-                              <button onClick={e => { e.stopPropagation(); toggleBookmark(currentWord.id); }}
-                                class={`text-sm ${bookmarked.has(currentWord.id) ? "text-amber-400" : "text-slate-700"}`}>★</button>
-                            </div>
-                            <div class="text-center px-2">
-                              <h2 class="text-3xl font-black text-white tracking-tight select-all">{currentWord.word}</h2>
-                              <p class="text-[10px] text-slate-600 mt-1.5">화면을 탭하면 한국어 뜻 확인</p>
-                            </div>
-                            <div class="flex justify-center">
-                              <button onClick={e => { e.stopPropagation(); playPronunciation(currentWord.word); }}
-                                class="px-3 py-1 rounded-full bg-[#1c263b] border border-slate-800 text-sky-400 text-[10px] font-medium active:scale-95 transition-transform">
-                                🔊 발음 듣기
-                              </button>
-                            </div>
-                          </div>
-
-                          {/* CARD BACK (KOREAN MEANING) */}
-                          <div class="absolute w-full h-full bg-[#0f172a] border border-sky-950 rounded-2xl flex flex-col justify-between p-4 backface-hidden rotate-y-180">
-                            <div class="flex justify-between items-center w-full">
-                              <span class="text-[9px] mono text-sky-500 font-bold tracking-wider uppercase">MEANING</span>
-                              <button onClick={e => { e.stopPropagation(); toggleMemorized(currentWord.id); }}
-                                class={`text-xs px-2 py-0.5 rounded border ${memorized.has(currentWord.id) ? "border-sky-500/40 bg-sky-500/10 text-sky-400" : "border-slate-800 text-slate-500"}`}>
-                                ✓ {memorized.has(currentWord.id) ? "외웠음" : "미암기"}
-                              </button>
-                            </div>
-                            <div class="text-center px-1">
-                              <p class="text-base font-bold text-sky-300 leading-snug break-all">{currentWord.meaning}</p>
-                              <button onClick={e => { e.stopPropagation(); playMeaning(currentWord.meaning); }}
-                                class="text-[10px] text-slate-600 active:text-slate-400 mt-2 underline decoration-slate-700">🔊 뜻 듣기</button>
-                            </div>
-                            <p class="text-center text-[9px] text-slate-700">다시 탭하면 영단어가 노출됩니다</p>
-                          </div>
-
+                container.innerHTML = shuffledData.map((item, idx) => `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs text-indigo-500 font-bold uppercase tracking-wider">No. ${idx + 1}</span>
+                            <span class="text-xl font-bold text-slate-800">${item.word}</span>
                         </div>
-                      </div>
-
-                      {/* Mobile Optimized Etymology Info Display Card */}
-                      <div class="w-full max-w-sm bg-[#0e1526] border border-slate-800/80 rounded-xl p-4 text-left glow-cyan">
-                        <div class="flex items-center gap-1.5 mb-2.5">
-                          <span class="w-1.5 h-1.5 rounded-full bg-sky-500 animate-pulse"></span>
-                          <span class="text-[9px] uppercase mono font-black tracking-widest text-sky-400">어원 분석 입체 학습</span>
+                        <div class="mt-2 text-sm font-medium text-slate-600 border-t border-slate-200/60 pt-2">
+                            <span class="text-indigo-600">뜻:</span> ${item.meaning}
                         </div>
-                        
-                        <div class="space-y-3">
-                          {/* Prefix & Root Badges */}
-                          <div class="flex flex-wrap gap-1 text-[10px] font-medium">
-                            <span class="px-2 py-0.5 bg-[#131b2e] rounded-md text-slate-300 border border-slate-800 mono">
-                              형태: <b class="text-sky-400 font-semibold">{currentWord.prefix || "단일어원"}</b>
-                            </span>
-                            {currentWord.root && (
-                              <span class="px-2 py-0.5 bg-[#131b2e] rounded-md text-slate-300 border border-slate-800 mono">
-                                어근: <b class="text-cyan-400 font-semibold">{currentWord.root}</b>
-                              </span>
-                            )}
-                          </div>
-
-                          {/* Story Narrative */}
-                          <p class="text-slate-300 text-xs leading-relaxed font-normal bg-[#0b0f19]/40 p-2 rounded-lg border border-slate-900/50">
-                            {currentWord.story || "단어 원본 고유 구조 표제어입니다."}
-                          </p>
-
-                          {/* Cognates Block */}
-                          {currentWord.related && (
-                            <div class="pt-2 border-t border-slate-900">
-                              <span class="text-[9px] font-bold text-amber-500 uppercase tracking-wider mono block mb-1">어근 공유 동계어 (Cognates)</span>
-                              <div class="text-[11px] text-slate-400 mono leading-relaxed bg-[#131b2e] p-2 rounded-lg border border-slate-800">
-                                {currentWord.related}
-                              </div>
-                            </div>
-                          )}
+                        <div class="mt-2 text-xs text-slate-500 bg-white p-2 rounded border border-slate-100">
+                            <strong class="text-amber-600">💡 어원:</strong> ${item.etymology}
                         </div>
-                      </div>
-
-                    </React.Fragment>
-                  ) : (
-                    <div class="text-center p-6 bg-[#0e1526] border border-slate-800 rounded-xl w-full max-w-xs">
-                      <p class="text-slate-500 text-xs mb-2">선택된 단어가 없습니다.</p>
-                      <button onClick={() => { setFilterMode("all"); setSearchQuery(""); }}
-                        class="text-xs text-sky-400 font-bold underline">필터 초기화</button>
+                        <div class="mt-1 text-xs text-slate-500 bg-white p-2 rounded border border-slate-100">
+                            <strong class="text-emerald-600">🌿 동계어:</strong> ${item.cognates}
+                        </div>
                     </div>
-                  )}
-                </div>
+                `).join('');
+            } else {
+                const item = shuffledData[cardIndex];
+                
+                // 카드 모드일 때 푸터 구조 파괴 없이 내부 content 영역만 분리 제어 (안전한 스위칭 구현)
+                footerContent.className = "w-full flex justify-between items-center px-2";
+                footerContent.innerHTML = `
+                    <button onclick="prevCard()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg ${cardIndex === 0 ? 'opacity-50 pointer-events-none' : ''}">이전</button>
+                    <span class="font-semibold text-slate-600">${cardIndex + 1} / ${shuffledData.length}</span>
+                    <button onclick="nextCard()" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg ${cardIndex === shuffledData.length - 1 ? 'opacity-50 pointer-events-none' : ''}">다음</button>
+                `;
+                
+                container.innerHTML = `
+                    <div class="text-center text-xs text-slate-400 mb-2">💡 카드를 터치하면 뜻과 어원이 나타납니다.</div>
+                    <div class="card-flip w-full h-80 cursor-pointer" onclick="flipCard()">
+                        <div id="card-inner" class="card-inner w-full h-full relative rounded-2xl shadow-lg border border-slate-200">
+                            <div class="card-front absolute w-full h-full bg-indigo-50 flex flex-col justify-center items-center rounded-2xl p-6">
+                                <span class="text-xs text-indigo-400 font-bold tracking-widest mb-4">WORD</span>
+                                <h2 class="text-3xl font-extrabold text-indigo-700 tracking-tight">${item.word}</h2>
+                            </div>
+                            <div class="card-back absolute w-full h-full bg-white flex flex-col justify-between rounded-2xl p-6 overflow-y-auto">
+                                <div>
+                                    <span class="text-xs text-emerald-500 font-bold tracking-widest block mb-2">MEANING</span>
+                                    <h3 class="text-xl font-bold text-slate-800 border-b pb-2 border-slate-100">${item.meaning}</h3>
+                                </div>
+                                <div class="my-3 text-left space-y-2">
+                                    <p class="text-xs text-slate-600"><strong class="text-amber-600 block mb-0.5">💡 어원</strong> ${item.etymology}</p>
+                                    <p class="text-xs text-slate-600"><strong class="text-emerald-600 block mb-0.5">🌿 동계어</strong> ${item.cognates}</p>
+                                </div>
+                                <span class="text-[10px] text-slate-300">다시 터치하면 앞면으로 돌아갑니다.</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
 
-                {/* Card Navigation Controls */}
-                <div class="flex items-center justify-between gap-3 w-full max-w-sm mx-auto mt-4">
-                  <button onClick={handlePrev} disabled={filteredWords.length <= 1}
-                    class="flex-1 py-2.5 rounded-xl bg-[#131b2e] border border-slate-800 hover:border-slate-700 active:scale-95 text-slate-300 text-xs font-bold transition-all disabled:opacity-20">
-                    이전 단어
-                  </button>
-                  <button onClick={handleNext} disabled={filteredWords.length <= 1}
-                    class="flex-1 py-2.5 rounded-xl bg-sky-600 active:scale-95 text-white text-xs font-bold transition-all disabled:opacity-20 shadow-lg shadow-sky-600/10">
-                    다음 단어
-                  </button>
-                </div>
-              </div>
-            )}
+        function flipCard() {
+            document.getElementById('card-inner').classList.toggle('card-flipped');
+        }
 
-          </div>
+        function nextCard() {
+            if (cardIndex < shuffledData.length - 1) {
+                cardIndex++;
+                renderContent();
+            }
+        }
 
-          {/* BOTTOM GLOBAL MOBILE TAB BAR */}
-          <div class="flex-shrink-0 bg-[#0f172a] border-t border-slate-800 flex justify-around pb-safe z-50">
-            <button onClick={() => { setActiveTab("list"); setIsPlaying(false); }}
-              class={`flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors ${activeTab === "list" ? "text-sky-400 bg-sky-950/10 font-bold" : "text-slate-500"}`}>
-              <span class="text-base">📋</span>
-              <span class="text-[10px]">단어 목록</span>
-            </button>
-            <button onClick={() => { setActiveTab("card"); setShowMeaning(true); }}
-              class={`flex-1 py-3 flex flex-col items-center justify-center gap-0.5 transition-colors ${activeTab === "card" ? "text-sky-400 bg-sky-950/10 font-bold" : "text-slate-500"}`}>
-              <span class="text-base">🃏</span>
-              <span class="text-[10px]">카드 학습</span>
-            </button>
-          </div>
+        function prevCard() {
+            if (cardIndex > 0) {
+                cardIndex--;
+                renderContent();
+            }
+        }
 
-        </div>
-      );
-    }
-
-    ReactDOM.createRoot(document.getElementById('root')).render(<App />);
-  </script>
+        // 최초 실행 시 자동으로 무작위 배열 적용
+        reshuffleWords();
+    </script>
 </body>
 </html>
