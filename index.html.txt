@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>얼룩말영어학원 고등 BASIC 단어장</title>
+    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
+        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
+        .card-flip { perspective: 1000px; }
+        .card-inner { transition: transform 0.5s; transform-style: preserve-3d; }
+        .card-flipped { transform: rotateY(180deg); }
+        .card-front, .card-back { backface-visibility: hidden; }
+        .card-back { transform: rotateY(180deg); }
+    </style>
+</head>
+<body class="flex justify-center min-h-screen">
+
+    <div class="w-full max-w-md bg-white shadow-xl flex flex-col justify-between min-h-screen border-x border-slate-200">
+        
+        <header class="bg-indigo-600 text-white p-4 text-center shadow-md">
+            <h1 class="text-xl font-bold tracking-wide">🦓 얼룩말영어학원</h1>
+            <p class="text-xs text-indigo-200 mt-1 font-medium">워마 고등 BASIC 13 재시험 단어장 (40단어 완벽본)</p>
+        </header>
+
+        <main class="flex-1 p-4 overflow-y-auto">
+            
+            <div class="flex justify-end gap-2 mb-4 text-xs font-medium">
+                <button onclick="switchMode('list')" id="mode-list" class="px-3 py-1.5 rounded-full bg-slate-800 text-white shadow">목록 보기</button>
+                <button onclick="switchMode('card')" id="mode-card" class="px-3 py-1.5 rounded-full bg-slate-200 text-slate-700">카드 학습</button>
+            </div>
+
+            <div id="vocab-container" class="space-y-3"></div>
+
+        </main>
+
+        <footer class="bg-slate-50 border-t border-slate-200 p-3 text-center text-xs text-slate-400" id="app-footer">
+            © 얼룩말영어학원 | 스마트 단어 학습 시스템
+        </footer>
+    </div>
+
+    <script>
+        const vocabData = [
+            { word: "endure", meaning: "견디다, 참다", etymology: "en-(안에) + 라틴어 durus(단단한). 거친 환경이나 고통 속에서도 마음을 단단하게 유지하며 버티다.", cognates: "endurance (인내), endurable (견딜 수 있는)" },
+            { word: "compassion", meaning: "동정, 연민", etymology: "com-(함께) + 라틴어 pati(고통을 겪다). 타인이 겪는 고통과 비극적인 슬픔을 가슴 깊이 함께 느끼는 마음.", cognates: "compassionate (동정심이 많은)" },
+            { word: "jealous", meaning: "질투하는", etymology: "그리스어 zelos(열정, 시기)에서 파생됨. 남이 가진 좋은 것을 시샘하거나 탐내며 타오르는 감정 상태.", cognates: "jealousy (질투)" },
+            { word: "reluctant", meaning: "(마음이) 내키지 않는, 꺼리는", etymology: "re-(반대하여) + 라틴어 luctari(싸우다, 저항하다). 특정 행동을 요구받았을 때 마음속으로 강하게 저항하며 주저하는.", cognates: "reluctance (꺼림, 마지못해 함)" },
+            { word: "astonished", meaning: "깜짝 놀란", etymology: "라틴어 ex-(밖으로) + tonare(천둥 치다)의 결합형. 갑자기 천둥을 맞은 것처럼 이성을 잃고 멍해질 정도로 크게 놀란.", cognates: "astonish (깜짝 놀라게 하다), astonishment (놀람)" },
+            { word: "ridiculous", meaning: "터무니없는, 어리석은, 우스운", etymology: "라틴어 ridere(웃다)에서 파생. 이치에 전혀 맞지 않아 공개적인 비웃음거리나 조롱거리로 만들 만한 수치스러운 상태.", cognates: "ridicule (조롱하다, 비웃다)" },
+            { word: "empathy", meaning: "감정 이입, 공감", etymology: "em-(안에) + pathos(감정, 고통). 자신을 타인의 상황 속에 완벽히 밀어 넣어 그 내면의 슬픔과 감정을 고스란히 느끼는 과정.", cognates: "empathize (공감하다), empathetic (공감하는)" },
+            { word: "generous", meaning: "관대한, 후한", etymology: "라틴어 genus(고귀한 태생, 가문). 과거 귀족적인 성품으로 타인에게 너그럽고 재물을 아낌없이 베푸는 양상에서 유래.", cognates: "generosity (너그러움, 관대함)" },
+            { word: "anticipate", meaning: "기대하다, 예상하다", etymology: "anti-(앞서서) + 라틴어 capere(잡다). 다가올 미래의 일이나 결과를 시간적으로 미리 머릿속으로 움켜쥐어 생각하다.", cognates: "anticipation (예상, 기대)" },
+            { word: "miserable", meaning: "비참한, 불쌍한", etymology: "라틴어 miser(불쌍하고 가련한 상태)에서 유래. 물질적 혹은 정신적으로 온전한 보호를 받지 못해 지독하게 황폐해진 상태.", cognates: "misery (비참함, 고통)" },
+            { word: "arouse", meaning: "불러일으키다, 유발하다, 깨우다", etymology: "a-(강조) + rouse(잠에서 깨우다). 깊이 잠들어 있거나 고요한 감정, 의식, 자극을 밖으로 강하게 흔들어 깨우는 행위.", cognates: "rouse (깨우다)" },
+            { word: "confident", meaning: "자신감 있는, 확신하는", etymology: "con-(완전히) + 라틴어 fidere(믿다). 자신의 능력이나 어떤 사실의 진위 여부에 대해 의심 없이 완벽하게 신뢰하는.", cognates: "confidence (자신감, 신뢰), confide (비밀을 털어놓다)" },
+            { word: "irritate", meaning: "짜증나게[화나게] 하다, 거슬리다", etymology: "라틴어 irritare(흥분시키다, 자극하다). 피부 표면이나 내면의 평화로운 감정을 지속적으로 긁어 신경질을 유발하는 행위.", cognates: "irritation (짜증, 자극), irritable (화가 잘 나는)" },
+            { word: "humble", meaning: "겸손한, 비천한", etymology: "라틴어 humus(흙, 땅바닥)에서 유래. 자신을 높이지 않고 가장 낮은 땅바닥 수준으로 내리는 성품 혹은 사회적 신분.", cognates: "humility (겸손), humbleness (겸손함)" },
+            { word: "despair", meaning: "절망, 절망하다", etymology: "de-(부정/없이) + 라틴어 sperare(희망을 품다). 눈앞의 미래에서 의지할 수 있는 가느다란 희망의 불씨가 완전히 사라진 상태.", cognates: "desperate (필사적인, 절망적인)" },
+            { word: "make sense of", meaning: "~을 이해하다, ~을 파악하다", etymology: "make(만들다) + sense(이치, 의미) + of. 복잡하게 뒤엉켜 이해되지 않는 사실에서 올바른 논리적 인과관계를 도출해 내다.", cognates: "sense (감각, 이성)" },
+            { word: "crawl", meaning: "기어가다, 서행하다, 기어가기, 서행", etymology: "고대 노르드어 krafla(손발로 짚으며 나아가다)에서 유래. 몸을 바닥에 밀착시키거나 바퀴를 아주 느리게 굴려 움직이는 양상.", cognates: "crawler (기어가는 것, 크롤러)" },
+            { word: "impulse", meaning: "충동", etymology: "in-(안으로) + 라틴어 pellere(밀어붙이다). 이성적으로 깊이 생각하기 전에 가슴속 깊은 곳에서 행동을 하라고 강하게 등 떠미는 힘.", cognates: "impulsive (충동적인), compel (강요하다)" },
+            { word: "ashamed", meaning: "부끄러워하는", etymology: "a-(강조) + 고대 영어 scamu(수치심). 사회적 규범이나 스스로 세운 도덕적 기준을 만족하지 못해 내면에서 일어나는 부끄러움.", cognates: "shame (창피, 부끄러움)" },
+            { word: "hesitate", meaning: "주저하다, 망설이다", etymology: "라틴어 haerere(딱 달라붙어 멈춰 서다). 앞으로 나아가야 할 선택의 기로에서 결정을 내리지 못하고 한자리에 묶여 있는.", cognates: "hesitation (망설임), hesitant (주저하는)" },
+            { word: "arrogant", meaning: "거만한, 오만한", etymology: "ad-(~에게) + 라틴어 rogare(요구하다/주장하다). 자신이 지닌 가치 이상의 권리와 대접을 타인에게 무리하게 요구하며 뽐내는.", cognates: "arrogance (오만, 거만)" },
+            { word: "frustrated", meaning: "좌절감을 느끼는", etymology: "라틴어 frustra(헛되이, 쓸모없이)에서 파생. 목표를 달성하고자 온 힘을 쏟았으나 방해 요인에 가로막혀 노력이 무위로 돌아간 상태.", cognates: "frustrate (좌절시키다), frustration (좌절, 불만)" },
+            { word: "glance", meaning: "힐긋[얼핏] 보다, 힐긋 봄", etymology: "중세 영어 glansen(비스듬히 미끄러져 튕겨 나가다). 시선을 한곳에 고정하지 않고 표면을 스치듯 아주 잠깐 쳐다보는 행위.", cognates: "glancing (빗나가는)" },
+            { word: "fascinated", meaning: "매료된, 매혹된", etymology: "라틴어 fascinare(마법을 걸다, 주문을 외우다). 강력한 아름다움이나 가치에 마음을 사로잡혀 마치 마법에 걸린 듯 꼼짝 못 하는.", cognates: "fascinate (매혹시키다), fascinating (대단히 흥미로운)" },
+            { word: "responsible", meaning: "책임감 있는, 책임이 있는", etymology: "re-(다시) + 라틴어 spondere(엄숙하게 약속하다). 자신이 행한 결과나 의무에 대해 정당하게 대답하고 감당해 낼 의무가 존재하는.", cognates: "responsibility (책임), respond (대답하다)" },
+            { word: "genuine", meaning: "진짜의, 진실한", etymology: "라틴어 genu(무릎)에서 유래. 고대 로마에서 아버지가 갓 태어난 아기를 자신의 무릎 위에 올려 가문의 핏줄(진짜)로 인정하던 관습.", cognates: "genuinely (진심으로)" },
+            { word: "impatient", meaning: "참을 수 없는, 성급한", etymology: "in-(부정/반대) + patient(참을성 있는). 약속된 시간이나 고통의 무게를 조용히 견디지 못하고 조급하게 구는 유약한 내면 상태.", cognates: "impatience (조급증), patient (환자, 참을성 있는)" },
+            { word: "applause", meaning: "박수갈채", etymology: "ad-(~에게) + 라틴어 plaudere(손뼉을 치다). 공연자나 훌륭한 성과를 낸 사람의 공로를 치하하기 위해 다 함께 손바닥을 강하게 부딪치는 소리.", cognates: "applaud (칭찬하다, 박수를 보내다)" },
+            { word: "faithful", meaning: "충실한", etymology: "faith(믿음, 신념) + ful(~이 가득 찬). 자신이 맺은 조약, 군주, 종교적 신념에 대해 변절하지 않고 끝까지 신의를 지키는 상태.", cognates: "faith (믿음), faithfully (충실하게)" },
+            { word: "tolerate", meaning: "참다, 견디다, 용인하다", etymology: "라틴어 tolerare(무거운 짐을 짊어지고 버티다). 자신과 다른 가치관이나 불쾌한 상황을 배척하지 않고 너그럽게 품어주는 행위.", cognates: "tolerance (관용, 내성), tolerant (너그러운)" },
+            { word: "humiliate", meaning: "창피를 주다, 굴욕감을 느끼게 하다", etymology: "라틴어 humilis(낮은, 겸손한)의 동사형. 타인의 자존심을 짓밟아 사회적인 신분이나 체면을 땅바닥 수준으로 떨어뜨려 수치심을 주다.", cognates: "humiliation (굴욕), humility (겸손)" },
+            { word: "frank", meaning: "솔직한, 숨김없는", etymology: "고대 게르만족 계열의 프랭크(Frank) 족 이름에서 유래. 프랭크 족이 지배층으로서 누렸던 '자유로운 신분'에서 '거짓 없이 자유롭게 말하는 성품'.", cognates: "frankly (솔직히 말해서)" },
+            { word: "offend", meaning: "감정을 상하게 하다, 위반하다", etymology: "ob-(~에 맞서서) + 라틴어 fendere(치다, 타격을 주다). 상대방의 경계선을 무리하게 침범하여 심리적 타격을 주거나 법을 깨부수다.", cognates: "offense (범죄, 공격), offensive (모욕적인)" },
+            { word: "eager", meaning: "열망하는, 열심인", etymology: "라틴어 acer(날카로운, 신랄한, 활기찬). 칼날이 예리하게 서 있는 것처럼 특정 목표를 달성하고자 하는 정신이 날카롭게 집중된.", cognates: "eagerness (열의, 열망)" },
+            { word: "sincere", meaning: "진실된, 진심의", etymology: "라틴어 sincerus(순수한, 섞이지 않은). 꿀에 불순물이나 왁스(cera)가 섞이지 않은 상태에서 유래하여 거짓이나 위선이 없는 투명한 마음.", cognates: "sincerity (진실성, 성실)" },
+            { word: "depression", meaning: "우울(증), 불황", etymology: "de-(아래로) + press(누르다) + ion. 평온하던 내면의 정신세계나 역동적이던 사회적 경제 흐름을 바닥을 향해 꾹 짓눌러 꺼트린 상태.", cognates: "depress (우울하게 하다), depressive (우울증의)" },
+            { word: "put up with", meaning: "~을 참다, ~을 참고 견디다", etymology: "put(놓다) + up(완전히 위에) + with(~와 함께). 자신에게 주어지는 불쾌한 짐이나 대상을 거부하지 않고 완전히 짊어진 채 같이 가다.", cognates: "put (놓다)" },
+            { word: "awkward", meaning: "서투른, 어색한", etymology: "고대 노르드어 afgr(잘못된 방향을 향하는) + ward(방향 접미사). 물건을 다루거나 사람을 대할 때 조화롭지 못하고 삐딱하게 행동하는 양상.", cognates: "awkwardness (어색함)" },
+            { word: "resent", meaning: "화를 내다, 분개하다", etymology: "re-(강조/다시) + 라틴어 sentire(느끼다). 부당하고 가혹한 대우를 받았을 때 그 불쾌하고 나쁜 감정을 가슴속에서 계속 강하게 느끼며 표출하다.", cognates: "resentment (분개, 분노), resentful (억울해하는)" },
+            { word: "delight", meaning: "기쁨, 기쁘게 하다", etymology: "de-(완전히) + 라틴어 lacere(유혹하다, 끌어당기다). 아름다운 대상에 마음이 완전히 사로잡혀 극상의 영혼적 즐거움과 만족감을 느끼는 상태.", cognates: "delightful (아주 즐거운), delighted (기뻐하는)" }
+        ];
+
+        let currentMode = 'list';
+        let cardIndex = 0;
+
+        function switchMode(mode) {
+            currentMode = mode;
+            cardIndex = 0; 
+            const listBtn = document.getElementById('mode-list');
+            const cardBtn = document.getElementById('mode-card');
+
+            if(mode === 'list') {
+                listBtn.className = "px-3 py-1.5 rounded-full bg-slate-800 text-white shadow";
+                cardBtn.className = "px-3 py-1.5 rounded-full bg-slate-200 text-slate-700";
+            } else {
+                cardBtn.className = "px-3 py-1.5 rounded-full bg-slate-800 text-white shadow";
+                listBtn.className = "px-3 py-1.5 rounded-full bg-slate-200 text-slate-700";
+            }
+            renderContent();
+        }
+
+        function renderContent() {
+            const container = document.getElementById('vocab-container');
+            const footer = document.getElementById('app-footer');
+
+            if (currentMode === 'list') {
+                footer.innerHTML = `© 얼룩말영어학원 | 스마트 단어 학습 시스템`;
+                container.innerHTML = vocabData.map((item, idx) => `
+                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm">
+                        <div class="flex justify-between items-start">
+                            <span class="text-xs text-indigo-500 font-bold uppercase tracking-wider">No. ${idx + 1}</span>
+                            <span class="text-xl font-bold text-slate-800">${item.word}</span>
+                        </div>
+                        <div class="mt-2 text-sm font-medium text-slate-600 border-t border-slate-200/60 pt-2">
+                            <span class="text-indigo-600">뜻:</span> ${item.meaning}
+                        </div>
+                        <div class="mt-2 text-xs text-slate-500 bg-white p-2 rounded border border-slate-100">
+                            <strong class="text-amber-600">💡 어원:</strong> ${item.etymology}
+                        </div>
+                        <div class="mt-1 text-xs text-slate-500 bg-white p-2 rounded border border-slate-100">
+                            <strong class="text-emerald-600">🌿 동계어:</strong> ${item.cognates}
+                        </div>
+                    </div>
+                `).join('');
+            } else {
+                const item = vocabData[cardIndex];
+                footer.innerHTML = `
+                    <div class="flex justify-between items-center px-4 py-1">
+                        <button onclick="prevCard()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg ${cardIndex === 0 ? 'opacity-50 pointer-events-none' : ''}">이전</button>
+                        <span class="font-semibold text-slate-600">${cardIndex + 1} / ${vocabData.length}</span>
+                        <button onclick="nextCard()" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg ${cardIndex === vocabData.length - 1 ? 'opacity-50 pointer-events-none' : ''}">다음</button>
+                    </div>
+                `;
+                
+                container.innerHTML = `
+                    <div class="text-center text-xs text-slate-400 mb-2">💡 카드를 터치하면 뜻과 어원이 나타납니다.</div>
+                    <div class="card-flip w-full h-80 cursor-pointer" onclick="flipCard()">
+                        <div id="card-inner" class="card-inner w-full h-full relative rounded-2xl shadow-lg border border-slate-200">
+                            <div class="card-front absolute w-full h-full bg-indigo-50 flex flex-col justify-center items-center rounded-2xl p-6">
+                                <span class="text-xs text-indigo-400 font-bold tracking-widest mb-4">WORD</span>
+                                <h2 class="text-3xl font-extrabold text-indigo-700 tracking-tight">${item.word}</h2>
+                            </div>
+                            <div class="card-back absolute w-full h-full bg-white flex flex-col justify-between rounded-2xl p-6 overflow-y-auto">
+                                <div>
+                                    <span class="text-xs text-emerald-500 font-bold tracking-widest block mb-2">MEANING</span>
+                                    <h3 class="text-xl font-bold text-slate-800 border-b pb-2 border-slate-100">${item.meaning}</h3>
+                                </div>
+                                <div class="my-3 text-left space-y-2">
+                                    <p class="text-xs text-slate-600"><strong class="text-amber-600 block mb-0.5">💡 어원</strong> ${item.etymology}</p>
+                                    <p class="text-xs text-slate-600"><strong class="text-emerald-600 block mb-0.5">🌿 동계어</strong> ${item.cognates}</p>
+                                </div>
+                                <span class="text-[10px] text-slate-300">다시 터치하면 앞면으로 돌아갑니다.</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        function flipCard() {
+            document.getElementById('card-inner').classList.toggle('card-flipped');
+        }
+
+        function nextCard() {
+            if (cardIndex < vocabData.length - 1) {
+                cardIndex++;
+                renderContent();
+            }
+        }
+
+        function prevCard() {
+            if (cardIndex > 0) {
+                cardIndex--;
+                renderContent();
+            }
+        }
+
+        // Initialize App
+        renderContent();
+    </script>
+</body>
+</html>
