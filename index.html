@@ -2,220 +2,378 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>얼룩말영어학원 고등 BASIC 단어장 (무작위 셔플)</title>
-    <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>고등 BASIC 어원 단어장 (23~24강)</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
-        body { font-family: 'Noto Sans KR', sans-serif; background-color: #f8fafc; }
-        .card-flip { perspective: 1000px; }
-        .card-inner { transition: transform 0.5s; transform-style: preserve-3d; }
-        .card-flipped { transform: rotateY(180deg); }
-        .card-front, .card-back { backface-visibility: hidden; }
-        .card-back { transform: rotateY(180deg); }
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; overflow-x: hidden; }
+        ::-webkit-scrollbar { width: 0px; background: transparent; }
+
+        /* 아코디언 애니메이션 */
+        .accordion-content { transition: max-height 0.35s cubic-bezier(0.4, 0, 0.2, 1), padding 0.35s ease, opacity 0.3s ease; max-height: 0; opacity: 0; overflow: hidden; }
+        .accordion-content.open { max-height: 350px; opacity: 1; padding-top: 1rem; padding-bottom: 1rem; }
+        
+        /* 플래시카드 3D 애니메이션 */
+        .perspective-1000 { perspective: 1000px; }
+        .transform-style-3d { transform-style: preserve-3d; }
+        .backface-hidden { backface-visibility: hidden; }
+        .rotate-y-180 { transform: rotateY(180deg); }
+        .flip-card-inner { transition: transform 0.65s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* 액티브 탭 스타일 */
+        .tab-btn.active { color: #0284c7; border-bottom-color: #0284c7; font-weight: 800; background-color: #f0f9ff; }
+
+        /* 모바일 컨테이너 */
+        .app-container { max-width: 480px; margin: 0 auto; background-color: #ffffff; min-height: 100vh; position: relative; box-shadow: 0 4px 25px rgba(0,0,0,0.06); }
     </style>
 </head>
-<body class="flex justify-center min-h-screen">
+<body>
 
-    <div class="w-full max-w-md bg-white shadow-xl flex flex-col justify-between min-h-screen border-x border-slate-200">
-        
-        <header class="bg-indigo-600 text-white p-4 text-center shadow-md z-10">
-            <h1 class="text-xl font-bold tracking-wide">🦓 얼룩말영어학원</h1>
-            <p class="text-xs text-indigo-200 mt-1 font-medium">워마 고등 BASIC 13 재시험 단어장 (순서 섞임)</p>
-        </header>
+<div class="app-container flex flex-col h-screen overflow-hidden">
+    
+    <!-- 상단 헤더 -->
+    <header class="bg-slate-800 text-white p-4 sticky top-0 z-20 flex justify-between items-center shadow-lg rounded-b-xl">
+        <div>
+            <h1 class="text-xl font-extrabold tracking-tight"><i class="fa-solid fa-graduation-cap text-sky-400 mr-2"></i>메타인지 단어장</h1>
+            <p class="text-xs text-slate-300 mt-1 font-medium">워드마스터 고등 BASIC (23강~24강)</p>
+        </div>
+        <button onclick="toggleMode()" id="modeToggleBtn" class="bg-slate-700 text-sky-300 px-3 py-1.5 rounded-full text-sm font-bold shadow-md hover:bg-slate-600 transition border border-slate-600">
+            <i class="fa-solid fa-layer-group mr-1"></i> 카드모드
+        </button>
+    </header>
 
-        <main class="flex-1 p-4 overflow-y-auto">
-            
-            <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 mb-4 text-center">
-                <p class="text-xs font-semibold text-amber-800">🔄 실행할 때마다 단어 순서가 무작위로 자동 설정됩니다.</p>
-            </div>
-
-            <div class="flex justify-between items-center mb-4">
-                <button onclick="reshuffleWords()" class="text-xs font-bold text-indigo-600 bg-indigo-50 border border-indigo-200 px-3 py-1.5 rounded-lg hover:bg-indigo-100 transition shadow-sm">🎲 다시 섞기</button>
-                <div class="flex gap-2 text-xs font-medium">
-                    <button onclick="switchMode('list')" id="mode-list" class="px-3 py-1.5 rounded-full bg-slate-800 text-white shadow">목록 보기</button>
-                    <button onclick="switchMode('card')" id="mode-card" class="px-3 py-1.5 rounded-full bg-slate-200 text-slate-700">카드 학습</button>
-                </div>
-            </div>
-
-            <div id="vocab-container" class="space-y-3 pb-4"></div>
-
-        </main>
-
-        <footer class="bg-slate-50 border-t border-slate-200 p-3 text-center text-xs text-slate-500 z-10" id="app-footer">
-            <div id="footer-content" class="w-full">© 얼룩말영어학원 | 스마트 단어 학습 시스템</div>
-        </footer>
+    <!-- 탭 네비게이션 -->
+    <div class="flex bg-white shadow-sm sticky top-[72px] z-10 border-b border-slate-200">
+        <button id="tab-23" onclick="setLesson(23)" class="tab-btn active flex-1 py-3.5 text-sm text-slate-500 border-b-2 border-transparent transition duration-200"><i class="fa-solid fa-book-open-reader mr-1"></i> 23강 (40단어)</button>
+        <button id="tab-24" onclick="setLesson(24)" class="tab-btn flex-1 py-3.5 text-sm text-slate-500 border-b-2 border-transparent transition duration-200"><i class="fa-solid fa-book-bookmark mr-1"></i> 24강 (40단어)</button>
     </div>
 
-    <script>
-        // 고등 BASIC 13과 단어 및 뜻 원본 데이터
-        const originalData = [
-            { word: "endure", meaning: "견디다, 참다", etymology: "en-(안에) + 라틴어 durus(단단한). 거친 환경이나 고통 속에서도 마음을 단단하게 유지하며 버티다.", cognates: "endurance (인내), endurable (견딜 수 있는)" },
-            { word: "compassion", meaning: "동정, 연민", etymology: "com-(함께) + 라틴어 pati(고통을 겪다). 타인이 겪는 고통과 비극적인 슬픔을 가슴 깊이 함께 느끼는 마음.", cognates: "compassionate (동정심이 많은)" },
-            { word: "jealous", meaning: "질투하는", etymology: "그리스어 zelos(열정, 시기)에서 파생됨. 남이 가진 좋은 것을 시샘하거나 탐내며 타오르는 감정 상태.", cognates: "jealousy (질투)" },
-            { word: "reluctant", meaning: "(마음이) 내키지 않는, 꺼리는", etymology: "re-(반대하여) + 라틴어 luctari(싸우다, 저항하다). 특정 행동을 요구받았을 때 마음속으로 강하게 저항하며 주저하는.", cognates: "reluctance (꺼림, 마지못해 함)" },
-            { word: "astonished", meaning: "깜짝 놀란", etymology: "라틴어 ex-(밖으로) + tonare(천둥 치다)의 결합형. 갑자기 천둥을 맞아 정신이 나갈 정도로 크게 놀란 상태.", cognates: "astonish (깜짝 놀라게 하다), astonishment (놀람)" },
-            { word: "ridiculous", meaning: "터무니없는, 어리석은, 우스운", etymology: "라틴어 ridere(웃다)에서 파생. 이치에 전혀 맞지 않아 공개적인 비웃음거리나 조롱거리로 만들 만한 상태.", cognates: "ridicule (조롱하다, 비웃다)" },
-            { word: "empathy", meaning: "감정 이입, 공감", etymology: "em-(안에) + pathos(감정, 고통). 자신을 타인의 상황 속에 완벽히 밀어 넣어 그 내면의 슬픔과 감정을 고스란히 느끼는 과정.", cognates: "empathize (공감하다), empathetic (공감하는)" },
-            { word: "generous", meaning: "관대한, 후한", etymology: "라틴어 genus(고귀한 태생, 가문). 과거 귀족적인 성품으로 타인에게 너그럽고 재물을 아낌없이 베푸는 양상에서 유래.", cognates: "generosity (너그러움, 관대함)" },
-            { word: "anticipate", meaning: "기대하다, 예상하다", etymology: "anti-(앞서서) + 라틴어 capere(잡다). 다가올 미래의 일이나 결과를 시간적으로 미리 머릿속으로 움켜쥐어 생각하다.", cognates: "anticipation (예상, 기대)" },
-            { word: "miserable", meaning: "비참한, 불쌍한", etymology: "라틴어 miser(불쌍하고 가련한 상태)에서 유래. 물질적 혹은 정신적으로 온전한 보호를 받지 못해 지독하게 황폐해진 상태.", cognates: "misery (비참함, 고통)" },
-            { word: "arouse", meaning: "불러일으키다, 유발하다, 깨우다", etymology: "a-(강조) + rouse(잠에서 깨우다). 깊이 잠들어 있거나 고요한 감정, 의식, 자극을 밖으로 강하게 흔들어 깨우는 행위.", cognates: "rouse (깨우다)" },
-            { word: "confident", meaning: "자신감 있는, 확신하는", etymology: "con-(완전히) + 라틴어 fidere(믿다). 자신의 능력이나 어떤 사실의 진위 여부에 대해 의심 없이 완벽하게 신뢰하는.", cognates: "confidence (자신감, 신뢰), confide (비밀을 털어놓다)" },
-            { word: "irritate", meaning: "짜증나게[화나게] 하다, 거슬리다", etymology: "라틴어 irritare(흥분시키다, 자극하다). 피부 표면이나 내면의 평화로운 감정을 지속적으로 긁어 신경질을 유발하는 행위.", cognates: "irritation (짜증, 자극), irritable (화가 잘 나는)" },
-            { word: "humble", meaning: "겸손한, 비천한", etymology: "라틴어 humus(흙, 땅바닥)에서 유래. 자신을 높이지 않고 가장 낮은 땅바닥 수준으로 내리는 성품 혹은 사회적 신분.", cognates: "humility (겸손), humbleness (겸손함)" },
-            { word: "despair", meaning: "절망, 절망하다", etymology: "de-(부정/없이) + 라틴어 sperare(희망을 품다). 눈앞의 미래에서 의지할 수 있는 가느다란 희망의 불씨가 완전히 사라진 상태.", cognates: "desperate (필사적인, 절망적인)" },
-            { word: "make sense of", meaning: "~을 이해하다, ~을 파악하다", etymology: "make(만들다) + sense(이치, 의미) + of. 복잡하게 뒤엉켜 이해되지 않는 사실에서 올바른 논리적 인과관계를 도출해 내다.", cognates: "sense (감각, 이성)" },
-            { word: "crawl", meaning: "기어가다, 서행하다, 기어가기, 서행", etymology: "고대 노르드어 krafla(손발로 짚으며 나아가다)에서 유래. 몸을 바닥에 밀착시키거나 바퀴를 아주 느리게 굴려 움직이는 양상.", cognates: "crawler (기어가는 것, 크롤러)" },
-            { word: "impulse", meaning: "충동", etymology: "in-(안으로) + 라틴어 pellere(밀어붙이다). 이성적으로 깊이 생각하기 전에 가슴속 깊은 곳에서 행동을 하라고 강하게 등 떠미는 힘.", cognates: "impulsive (충동적인), compel (강요하다)" },
-            { word: "ashamed", meaning: "부끄러워하는", etymology: "a-(강조) + 고대 영어 scamu(수치심). 사회적 규범이나 스스로 세운 도덕적 기준을 만족하지 못해 내면에서 일어나는 부끄러움.", cognates: "shame (창피, 부끄러움)" },
-            { word: "hesitate", meaning: "주저하다, 망설이다", etymology: "라틴어 haerere(딱 달라붙어 멈춰 서다). 앞으로 나아가야 할 선택의 기로에서 결정을 내리지 못하고 한자리에 묶여 있는.", cognates: "hesitation (망설임), hesitant (주저하는)" },
-            { word: "arrogant", meaning: "거만한, 오만한", etymology: "ad-(~에게) + 라틴어 rogare(요구하다/주장하다). 자신이 지닌 가치 이상의 권리와 대접을 타인에게 무리하게 요구하며 뽐내는.", cognates: "arrogance (오만, 거만)" },
-            { word: "frustrated", meaning: "좌절감을 느끼는", etymology: "라틴어 frustra(헛되이, 쓸모없이)에서 파생. 목표를 달성하고자 온 힘을 쏟았으나 방해 요인에 가로막혀 노력이 무위로 돌아간 상태.", cognates: "frustrate (좌절시키다), frustration (좌절, 불만)" },
-            { word: "glance", meaning: "힐긋[얼핏] 보다, 힐긋 봄", etymology: "중세 영어 glansen(비스듬히 미끄러져 튕겨 나가다). 시선을 한곳에 고정하지 않고 표면을 스치듯 아주 잠깐 쳐다보는 행위.", cognates: "glancing (빗나가는)" },
-            { word: "fascinated", meaning: "매료된, 매혹된", etymology: "라틴어 fascinare(마법을 걸다, 주문을 외우다). 강력한 아름다움이나 가치에 마음을 사로잡혀 마치 마법에 걸린 듯 꼼짝 못 하는.", cognates: "fascinate (매혹시키다), fascinating (대단히 흥미로운)" },
-            { word: "responsible", meaning: "책임감 있는, 책임이 있는", etymology: "re-(다시) + 라틴어 spondere(엄숙하게 약속하다). 자신이 행한 결과나 의무에 대해 정당하게 대답하고 감당해 낼 의무가 존재하는.", cognates: "responsibility (책임), respond (대답하다)" },
-            { word: "genuine", meaning: "진짜의, 진실한", etymology: "라틴어 genu(무릎)에서 유래. 고대 로마에서 아버지가 갓 태어난 아기를 자신의 무릎 위에 올려 가문의 핏줄로 인정하던 관습.", cognates: "genuinely (진심으로)" },
-            { word: "impatient", meaning: "참을 수 없는, 성급한", etymology: "in-(부정/반대) + patient(참을성 있는). 약속된 시간이나 고통의 무게를 조용히 견디지 못하고 조급하게 구는 유약한 내면 상태.", cognates: "impatience (조급증), patient (환자, 참을성 있는)" },
-            { word: "applause", meaning: "박수갈채", etymology: "ad-(~에게) + 라틴어 plaudere(손뼉을 치다). 공연자나 훌륭한 성과를 낸 사람의 공로를 치하하기 위해 손바닥을 부딪치는 소리.", cognates: "applaud (칭찬하다, 박수를 보내다)" },
-            { word: "faithful", meaning: "충실한", etymology: "faith(믿음, 신념) + ful(~이 가득 찬). 자신이 맺은 조약, 군주, 종교적 신념에 대해 변절하지 않고 끝까지 신의를 지키는 상태.", cognates: "faith (믿음), faithfully (충실하게)" },
-            { word: "tolerate", meaning: "참다, 견디다, 용인하다", etymology: "라틴어 tolerare(무거운 짐을 짊어지고 버티다). 자신과 다른 가치관이나 불쾌한 상황을 배척하지 않고 너그럽게 품어주는 행위.", cognates: "tolerance (관용, 내성), tolerant (너거운)" },
-            { word: "humiliate", meaning: "창피를 주다, 굴욕감을 느끼게 하다", etymology: "라틴어 humilis(낮은, 겸손한)의 동사형. 타인의 자존심을 짓밟아 사회적인 신분이나 체면을 땅바닥 수준으로 떨어뜨려 수치심을 주다.", cognates: "humiliation (굴욕), humility (겸손)" },
-            { word: "frank", meaning: "솔직한, 숨김없는", etymology: "고대 게르만족 계열의 프랭크(Frank) 족 이름에서 유래. 지배층으로서 누렸던 '자유로운 신분'에서 '거짓 없이 자유롭게 말하는 성품'.", cognates: "frankly (솔직히 말해서)" },
-            { word: "offend", meaning: "감정을 상하게 하다, 위반하다", etymology: "ob-(~에 맞서서) + 라틴어 fendere(치다, 타격을 주다). 상대방의 경계선을 무리하게 침범하여 심리적 타격을 주거나 법을 깨부수다.", cognates: "offense (범죄, 공격), offensive (모욕적인)" },
-            { word: "eager", meaning: "열망하는, 열심인", etymology: "라틴어 acer(날카로운, 신랄한, 활기찬). 칼날이 예리하게 서 있는 것처럼 특정 목표를 달성하고자 하는 정신이 날카롭게 집중된.", cognates: "eagerness (열의, 열망)" },
-            { word: "sincere", meaning: "진실된, 진심의", etymology: "라틴어 sincerus(순수한, 섞이지 않은). 위선이나 거짓의 불순물이 섞이지 않은 상태에서 유래한 투명한 마음.", cognates: "sincerity (진실성, 성실)" },
-            { word: "depression", meaning: "우울(증), 불황", etymology: "de-(아래로) + press(누르다) + ion. 평온하던 내면의 정신세계나 역동적이던 사회적 경제 흐름을 바닥을 향해 꾹 짓눌러 꺼트린 상태.", cognates: "depress (우울하게 하다), depressive (우울증의)" },
-            { word: "put up with", meaning: "~을 참다, ~을 참고 견디다", etymology: "put(놓다) + up(완전히 위에) + with(~와 함께). 자신에게 주어지는 불쾌한 짐이나 대상을 거부하지 않고 완전히 짊어진 채 같이 가다.", cognates: "put (놓다)" },
-            { word: "awkward", meaning: "서투른, 어색한", etymology: "고대 노르드어 afgr(잘못된 방향을 향하는) + ward(방향 접미사). 물건을 다루거나 사람을 대할 때 조화롭지 못하고 삐딱하게 행동하는 양상.", cognates: "awkwardness (어색함)" },
-            { word: "resent", meaning: "화를 내다, 분개하다", etymology: "re-(강조/다시) + 라틴어 sentire(느끼다). 부당하고 가혹한 대우를 받았을 때 그 불쾌하고 나쁜 감정을 가슴속에서 계속 강하게 느끼며 표출하다.", cognates: "resentment (분개, 분노), resentful (억울해하는)" },
-            { word: "delight", meaning: "기쁨, 기쁘게 하다", etymology: "de-(완전히) + 라틴어 lacere(유혹하다, 끌어당기다). 아름다운 대상에 마음이 완전히 사로잡혀 극상의 영혼적 즐거움과 만족감을 느끼는 상태.", cognates: "delightful (아주 즐거운), delighted (기뻐하는)" }
-        ];
+    <!-- 리스트 뷰 영역 -->
+    <main id="listView" class="flex-1 overflow-y-auto p-4 space-y-6 pb-24 bg-slate-50">
+        <!-- JS 렌더링 -->
+    </main>
 
-        let shuffledData = [];
-        let currentMode = 'list';
-        let cardIndex = 0;
+    <!-- 플래시카드 뷰 영역 -->
+    <div id="flashcardView" class="hidden absolute inset-0 bg-slate-900 bg-opacity-95 z-30 flex-col pb-10">
+        <div class="flex justify-between items-center p-5 text-white">
+            <span id="flashcardCounter" class="text-sm font-bold bg-slate-800 px-4 py-1.5 rounded-full border border-slate-600 text-sky-300 shadow-inner">1 / 40</span>
+            <button onclick="toggleMode()" class="text-slate-400 hover:text-white transition transform hover:rotate-90"><i class="fa-solid fa-xmark text-3xl"></i></button>
+        </div>
 
-        // Fisher-Yates 무작위 셔플 알고리즘
-        function shuffle(array) {
-            let currentIndex = array.length, randomIndex;
-            const newArray = [...array];
-            while (currentIndex != 0) {
-                randomIndex = Math.floor(Math.random() * currentIndex);
-                currentIndex--;
-                [newArray[currentIndex], newArray[randomIndex]] = [
-                newArray[randomIndex], newArray[currentIndex]];
-            }
-            return newArray;
-        }
-
-        // 수동/자동 재배치 제어 함수
-        function reshuffleWords() {
-            shuffledData = shuffle(originalData);
-            cardIndex = 0;
-            const cardInner = document.getElementById('card-inner');
-            if (cardInner) cardInner.classList.remove('card-flipped');
-            renderContent();
-        }
-
-        function switchMode(mode) {
-            currentMode = mode;
-            cardIndex = 0; 
-            const listBtn = document.getElementById('mode-list');
-            const cardBtn = document.getElementById('mode-card');
-
-            if(mode === 'list') {
-                listBtn.className = "px-3 py-1.5 rounded-full bg-slate-800 text-white shadow";
-                cardBtn.className = "px-3 py-1.5 rounded-full bg-slate-200 text-slate-700";
-            } else {
-                cardBtn.className = "px-3 py-1.5 rounded-full bg-slate-800 text-white shadow";
-                listBtn.className = "px-3 py-1.5 rounded-full bg-slate-200 text-slate-700";
-            }
-            renderContent();
-        }
-
-        function renderContent() {
-            const container = document.getElementById('vocab-container');
-            const footerContent = document.getElementById('footer-content');
-
-            if (currentMode === 'list') {
-                // 목록 모드일 때 푸터 내부를 원래 기본 텍스트로 격리 복원
-                footerContent.className = "w-full text-slate-400 text-center py-1";
-                footerContent.innerHTML = `© 얼룩말영어학원 | 스마트 단어 학습 시스템`;
+        <div class="flex-1 flex items-center justify-center p-6 w-full perspective-1000">
+            <div id="flashcard" class="w-full h-[65vh] max-w-sm relative transform-style-3d flip-card-inner cursor-pointer" onclick="flipCard()">
                 
-                container.innerHTML = shuffledData.map((item, idx) => `
-                    <div class="bg-slate-50 p-4 rounded-xl border border-slate-100 shadow-sm">
-                        <div class="flex justify-between items-start">
-                            <span class="text-xs text-indigo-500 font-bold uppercase tracking-wider">No. ${idx + 1}</span>
-                            <span class="text-xl font-bold text-slate-800">${item.word}</span>
+                <!-- 앞면 (단어) -->
+                <div class="absolute inset-0 w-full h-full bg-white rounded-3xl shadow-2xl backface-hidden flex flex-col justify-center items-center p-8 text-center border-b-8 border-sky-500">
+                    <span id="cardGroup" class="absolute top-6 text-[0.7rem] font-bold text-sky-800 bg-sky-100 px-3 py-1.5 rounded-full border border-sky-200 shadow-sm">그룹</span>
+                    <h2 id="cardWord" class="text-4xl font-black text-slate-800 mb-4 tracking-tight break-words">Word</h2>
+                    <p class="text-slate-400 text-sm mt-6 font-semibold animate-pulse"><i class="fa-solid fa-hand-pointer mr-2"></i>카드를 눌러 어원 보기</p>
+                </div>
+
+                <!-- 뒷면 (뜻 & 어원) -->
+                <div class="absolute inset-0 w-full h-full bg-slate-800 rounded-3xl shadow-2xl backface-hidden rotate-y-180 flex flex-col p-6 text-white overflow-y-auto border-b-8 border-slate-950">
+                    <h2 id="cardWordBack" class="text-2xl font-bold mb-2 border-b border-slate-600 pb-2 text-sky-300">Word</h2>
+                    <p id="cardMeaning" class="text-2xl font-black mb-5 text-white">의미</p>
+                    
+                    <div class="bg-slate-900 bg-opacity-70 rounded-xl p-4 mb-4 shadow-inner border border-slate-700">
+                        <p class="text-[0.7rem] text-sky-400 mb-2 font-bold uppercase tracking-wider"><i class="fa-solid fa-lightbulb mr-1"></i> 어원의 비밀 (Semantic Shift)</p>
+                        <p id="cardRoot" class="text-[0.9rem] leading-relaxed text-slate-200 font-medium">어원 설명</p>
+                    </div>
+                    
+                    <div class="bg-slate-900 bg-opacity-70 rounded-xl p-4 shadow-inner border border-slate-700">
+                        <p class="text-[0.7rem] text-emerald-400 mb-2 font-bold uppercase tracking-wider"><i class="fa-solid fa-link mr-1"></i> 동계어 (Family)</p>
+                        <p id="cardCognates" class="text-sm font-bold text-emerald-100">동계어 설명</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex justify-center items-center space-x-8 px-6 pb-4">
+            <button onclick="prevCard()" class="w-16 h-16 rounded-full bg-slate-700 text-white flex justify-center items-center active:bg-slate-600 hover:bg-slate-600 transition transform active:scale-90 shadow-lg border border-slate-600">
+                <i class="fa-solid fa-chevron-left text-2xl"></i>
+            </button>
+            <button onclick="nextCard()" class="w-16 h-16 rounded-full bg-sky-500 text-white flex justify-center items-center active:bg-sky-400 hover:bg-sky-400 transition transform active:scale-90 shadow-[0_0_20px_rgba(14,165,233,0.4)]">
+                <i class="fa-solid fa-chevron-right text-2xl"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const db = {
+        // ==========================================
+        // 23강 (40단어)
+        // ==========================================
+        23: [
+            // [1. 변화와 흔적]
+            { word: "transform", meaning: "변형시키다, 바꾸다", root: "trans(가로질러) + form(형태) → 번데기가 나비가 되듯, 한 형태에서 저쪽 너머의 전혀 다른 형태로 껍질을 깨고 '완전히 바꾸고 변형시키다'.", cognates: "transfer(이동하다), format(형식)", group: "1. 변화와 흔적" },
+            { word: "fossil", meaning: "화석", root: "fodere(파다) → 원래는 '땅에서 파낸 광물'을 모두 뜻했지만, 점차 의미가 좁아져 땅속에서 파낸 아주 오래된 '동식물의 굳어진 유해나 흔적(화석)'을 가리키게 됨.", cognates: "fosse(해자)", group: "1. 변화와 흔적" },
+            { word: "leak", meaning: "누설하다, 새다; 새는 곳", root: "leka(물방울이 맺히다) → 물을 담은 그릇에 미세한 틈이 생겨 액체가 한 방울씩 '새는' 것. 여기서 발전하여 비밀스러운 정보가 밖으로 줄줄 '누설되다'로 뜻이 확장됨.", cognates: "lack(부족하다 - 연관)", group: "1. 변화와 흔적" },
+            { word: "accumulate", meaning: "축적하다, 모으다", root: "ad(~에) + cumul(쌓다) → 산 정상에 눈이 한 겹씩 덮이듯, 한 곳에 물건이나 돈, 먼지 등을 계속해서 더하여 산더미처럼 '쌓고 모으다'.", cognates: "cumulus(적운, 뭉게구름)", group: "1. 변화와 흔적" },
+            { word: "wasteful", meaning: "낭비하는, 헛된", root: "waste(황폐한, 낭비) + ful → 기름진 땅이 쓸모없는 사막(황무지)으로 변해버리듯, 돈이나 자원을 헛되이 펑펑 써버려 완전히 '낭비하는'.", cognates: "waste(버리다, 쓰레기)", group: "1. 변화와 흔적" },
+            { word: "discard", meaning: "버리다, 폐기하다", root: "dis(버리다) + card(카드) → 카드 게임에서 승산이 없는 필요 없는 패를 뽑아서 손에서 '버리는 행위'에서 유래하여 일반적인 쓰레기를 '폐기하다'로 확장.", cognates: "card(카드)", group: "1. 변화와 흔적" },
+            { word: "raw", meaning: "날것의, 가공하지 않은", root: "고대영어 hreaw (가공되지 않은) → 공장에서 열을 가해 익히거나 기계로 자르고 붙이지 않은, 자연에서 막 가져온 순수하고 '가공되지 않은' 상태.", cognates: "-", group: "1. 변화와 흔적" },
+            { word: "wrap", meaning: "싸다, 포장하다", root: "고대영어 wlappen (감싸다) → 소중한 물건이나 음식이 상하지 않도록 종이나 헝겊을 이용해 주변을 빙 둘러 둥글게 '감싸고 포장하는' 행동.", cognates: "lap(무릎, 감싸다)", group: "1. 변화와 흔적" },
+
+            // [2. 미디어와 소통]
+            { word: "audience", meaning: "청중, 관중, 시청자", root: "aud(듣다) + ience → 눈으로만 보는 것이 아니라, 강연자의 목소리나 음악을 귀 기울여 '듣기 위해 한 장소에 모여든 사람들(청중)'.", cognates: "audio(오디오), audition(오디션)", group: "2. 미디어와 소통" },
+            { word: "announce", meaning: "발표하다, 알리다", root: "ad(향하여) + nuntiare(소식을 전하다) → 숨기지 않고 사람들을 향해(ad) 중요한 소식이나 정보를 큰 소리로 당당하게 '알리다'.", cognates: "pronounce(발음하다), noun(명사)", group: "2. 미디어와 소통" },
+            { word: "medium", meaning: "매체, 수단, 방법; 중간의", root: "med(중간) → 나와 너, 혹은 사건과 대중의 양쪽 끝 사이 딱 '중간'에 끼어서, 소식(정보)을 안전하게 이어주고 전달해 주는 다리 같은 '매개체'.", cognates: "middle(중간), mediate(중재하다)", group: "2. 미디어와 소통" },
+            { word: "brief", meaning: "간결한, 짧은; 요약하다", root: "brevis(짧은) → 구구절절 길게 늘어놓지 않고, 뼈대만 남겨 핵심적인 내용만 아주 '짧고 간결하게' 말하거나 정리하는 것.", cognates: "abbreviate(축약하다)", group: "2. 미디어와 소통" },
+            { word: "viewer", meaning: "시청자, 관객", root: "view(보다) + er → 영화관 스크린이나 텔레비전 화면 앞에서, 송출되는 영상과 이미지를 두 눈을 뜨고 집중해서 '지켜보는 사람'.", cognates: "view(시야, 보다)", group: "2. 미디어와 소통" },
+            { word: "broadcast", meaning: "방송하다, 널리 알리다", root: "broad(넓게) + cast(던지다) → 옛날 농부가 밭에 씨앗을 넓게 흩뿌리던 것에서 유래. 전파라는 씨앗을 사방으로 '넓게 던져 여러 사람에게 방송하다'.", cognates: "broad(넓은), cast(던지다)", group: "2. 미디어와 소통" },
+            { word: "convey", meaning: "전(달)하다, 운반하다", root: "con(함께) + via(길) → 소중한 물건이나 마음속 깊은 진심을, 끊어지지 않고 쭉 이어지는 '하나의 길을 따라 무사히 전달하고 운반하다'.", cognates: "convoy(호송하다), via(~을 경유하여)", group: "2. 미디어와 소통" },
+            { word: "respondent", meaning: "응답자", root: "re(다시) + spond(대답하다) + ent → 설문지나 질문을 던졌을 때, 침묵하지 않고 자신의 의견을 '다시 돌려보내어 대답해 주는 사람'.", cognates: "respond(반응하다), sponsor(후원자)", group: "2. 미디어와 소통" },
+            { word: "informative", meaning: "정보를 주는, 유익한", root: "in(안으로) + form(형태) + ative → 텅 빈 머릿속에 지식의 뼈대와 '형태를 잡아줄' 만큼, 알찬 지식과 '정보가 가득하여 유익한'.", cognates: "inform(알리다), information(정보)", group: "2. 미디어와 소통" },
+            { word: "commercial", meaning: "상업의, 상업적인; 광고", root: "com(함께) + merc(거래하다) → 예술이나 순수한 목적이 아니라, 시장에서 사람들과 물건을 사고팔아 돈을 벌기 위한 '상업적인' 속성이나 '광고'.", cognates: "commerce(상업), merchant(상인)", group: "2. 미디어와 소통" },
+            { word: "column", meaning: "칼럼, 기둥", root: "columna(기둥) → 거대한 신전을 받치는 둥근 '기둥'처럼, 신문이나 잡지에서 세로로 길게 내려쓴 글의 모양이 기둥을 닮았다고 하여 부르는 기사.", cognates: "colossal(거대한)", group: "2. 미디어와 소통" },
+
+            // [3. 물리적 형태와 상태]
+            { word: "steep", meaning: "가파른, 급격한", root: "고대영어 steap (높이 솟은) → 완만하게 걷기 편한 길이 아니라, 롤러코스터처럼 산이나 계단이 너무 높이 솟아올라 오르내리기 아찔하고 '가파른'.", cognates: "-", group: "3. 물리적 형태와 상태" },
+            { word: "pile", meaning: "더미, 쌓아 놓은 것", root: "pila(기둥, 돌더미) → 물건을 바닥에 어지럽게 널어두는 것이 아니라, 마치 하나의 둥근 기둥처럼 위를 향해 차곡차곡 '쌓아 올린 무더기'.", cognates: "pillar(기둥)", group: "3. 물리적 형태와 상태" },
+            { word: "evident", meaning: "분명한, 눈에 띄는", root: "e(밖으로) + vid(보다) + ent → 짙은 안개 속에 꽁꽁 숨어있던 산봉우리가 밖으로 훤히 제 모습을 드러내어 두 눈에 띄게 '보이니', 의심할 여지 없이 '분명한'.", cognates: "video(비디오), evidence(증거)", group: "3. 물리적 형태와 상태" },
+            { word: "mobile", meaning: "움직이기 쉬운, 기동성의", root: "mov(움직이다) + ible → 커다랗고 무거운 데스크탑 컴퓨터와 달리, 내 몸을 따라 어디든 가볍게 '이동하며 움직일 수 있는(휴대폰 등)'.", cognates: "move(움직이다), motion(동작)", group: "3. 물리적 형태와 상태" },
+            { word: "surface", meaning: "표면, 외관; 드러나다", root: "sur(위에) + face(얼굴) → 물체의 가장 바깥쪽, 껍질처럼 우리를 정면으로 마주 보는 '윗면이나 표면'. (물속에 잠겼던 것이 수면 위로 '드러나다'의 뜻도 가짐)", cognates: "surpass(능가하다), face(얼굴)", group: "3. 물리적 형태와 상태" },
+            { word: "visible", meaning: "(눈에) 보이는", root: "vis(보다) + ible → 현미경이 필요할 정도로 너무 작거나, 유령처럼 투명하지 않아서 우리의 두 눈으로 직접 뚜렷하게 '볼 수 있는'.", cognates: "vision(시야), invisible(보이지 않는)", group: "3. 물리적 형태와 상태" },
+            { word: "fabric", meaning: "직물, 천, 구조", root: "fabrica(작업장, 구조물) → 장인이 베틀(작업장)에 앉아 실의 가로세로를 촘촘하게 엮어 튼튼하게 만들어낸 '직물(천)'이자 건물의 '기본 구조'.", cognates: "fabricate(제조하다, 조작하다)", group: "3. 물리적 형태와 상태" },
+            { word: "portable", meaning: "휴대용의, 이동이 쉬운", root: "port(나르다) + able → 덩치가 크거나 콘센트가 묶여있지 않아, 언제든 가방에 쏙 넣고 손쉽게 밖으로 '나를(휴대할) 수 있는'.", cognates: "export(수출하다), import(수입하다)", group: "3. 물리적 형태와 상태" },
+            { word: "incline", meaning: "경사지다; (마음이) 기울다", root: "in(안으로/쪽으로) + clin(기울다) → 평평했던 땅이 언덕이 되어 한쪽으로 경사지거나, 결정을 못 하던 사람의 마음이 슬그머니 어느 한쪽으로 '기울어지다'.", cognates: "decline(거절하다), recline(기대다)", group: "3. 물리적 형태와 상태" },
+            { word: "variable", meaning: "변수; 변하기 쉬운", root: "var(다르다, 변하다) + able → 바위처럼 딱딱하게 고정되어 있지 않고, 온도나 기분 등 주변 상황에 따라 언제든지 다른 모습으로 '변할 수 있는 요인(변수)'.", cognates: "vary(다르다), variety(다양성)", group: "3. 물리적 형태와 상태" },
+
+            // [4. 한계와 환경]
+            { word: "ecosystem", meaning: "생태계", root: "eco(집, 환경) + system(체계) → 동물과 식물, 흙과 물이 각자의 '집(자연)' 안에서 서로 먹고 먹히며 거미줄처럼 영향을 주고받는 '거대한 체계'.", cognates: "ecology(생태학), economy(경제)", group: "4. 한계와 환경" },
+            { word: "pollution", meaning: "오염", root: "pol(더럽히다) + lut(씻다) → 본래 맑고 투명하게 씻겨 있던 강물이나 공기를, 공장 폐수나 매연 같은 오물로 검게 '더럽히는 끔찍한 행위'.", cognates: "pollute(오염시키다)", group: "4. 한계와 환경" },
+            { word: "threaten", meaning: "위협하다, 협박하다", root: "threat(위협) + en(동사화) → 칼을 들이밀며 나쁜 짓을 하겠다고 무서운 말이나 행동으로 상대방을 코너로 몰고 가며 '협박하다'.", cognates: "threat(위협)", group: "4. 한계와 환경" },
+            { word: "limitation", meaning: "제한, 한계", root: "limit(경계선) + ation → 인간의 능력이나 기계의 성능이 하늘 끝까지 닿지 못하고, 어느 선에서 더 이상 넘어갈 수 없도록 벽을 쳐버린 '한계점'.", cognates: "limit(제한하다)", group: "4. 한계와 환경" },
+            { word: "conserve", meaning: "보존[보호]하다, 아끼다", root: "con(완전히) + serv(지키다) → 아름다운 자연이나 귀중한 에너지가 훼손되거나 낭비되지 않도록 원래 상태 그대로 '완벽하게 지켜내고 아끼다'.", cognates: "preserve(보존하다), observe(관찰하다)", group: "4. 한계와 환경" },
+            { word: "litter", meaning: "쓰레기; 어지럽히다", root: "lectus(침대) → 옛날에 귀족이 타던 마차 바닥에 깔아두던 지푸라기에서 유래. 나중에 길거리에 지저분하게 흩뿌려진 '쓰레기'로 뜻이 낮아짐.", cognates: "-", group: "4. 한계와 환경" },
+            { word: "pesticide", meaning: "살충제", root: "pest(해충, 전염병) + cide(죽이다) → 농부들이 애써 기른 농작물을 갉아먹는 나쁜 해충이나 쥐구멍의 쥐를 독한 약으로 싹 '죽이는 약'.", cognates: "suicide(자살), pest(해충)", group: "4. 한계와 환경" },
+            { word: "endangered", meaning: "멸종 위기에 처한", root: "en(처하게 하다) + danger(위험) + ed → 사냥이나 서식지 파괴로 인해 동식물의 개체 수가 줄어들어, 지구상에서 영영 사라질 '위험 속에 빠지게 된'.", cognates: "danger(위험)", group: "4. 한계와 환경" },
+
+            // [5. 확장과 논리]
+            { word: "enhance", meaning: "높이다, 향상시키다", root: "en(위로) + altus(높은) → 밋밋하던 요리에 맛있는 소스를 얹듯, 어떤 것의 가치, 아름다움, 또는 성능을 한 단계 더 '높은 곳으로 끌어올리다'.", cognates: "altitude(고도), exalt(칭송하다)", group: "5. 확장과 논리" },
+            { word: "compelling", meaning: "설득력 있는, 강력한", root: "com(완전히) + pel(밀다) + ing → 영화나 연설이 너무 대단해서, 내 이성과 감정을 특정 방향으로 완전히 꼼짝 못 하게 '밀어붙일' 정도로 '강력한'.", cognates: "compel(강요하다), propel(나아가게 하다)", group: "5. 확장과 논리" },
+            { word: "(the) chances are (that)", meaning: "아마 ~일 것이다", root: "chance(운, 가능성) → 주사위를 던졌을 때 내가 원하는 면이 위로 올라와 딱 떨어질 법한 '확률이나 가능성이 매우 높다(아마 그럴 것이다)'.", cognates: "chance(기회)", group: "5. 확장과 논리" }
+        ],
+
+        // ==========================================
+        // 24강 (40단어)
+        // ==========================================
+        24: [
+            // [1. 자연과 환경]
+            { word: "filter", meaning: "필터, 여과 장치", root: "feltrum(펠트 천) → 옛날에 두꺼운 펠트 천을 여러 장 겹쳐서 구정물 속의 찌꺼기와 불순물을 맑게 걸러내던 것에서 유래한 '여과 장치'.", cognates: "felt(펠트 직물)", group: "1. 자연과 환경" },
+            { word: "dispose of", meaning: "~을 처리하다, 버리다", root: "dis(멀리, 따로) + pos(두다) → 방안에 쌓인 더러운 쓰레기나 골치 아픈 문제를, 내가 있는 곳에서 '따로 떼어 멀리 둬버리다(치워버리다)'.", cognates: "position(위치), expose(노출시키다)", group: "1. 자연과 환경" },
+            { word: "recycle", meaning: "재활용하다", root: "re(다시) + cycle(돌다) → 한 번 쓰고 쓰레기통으로 갈 뻔한 플라스틱이나 종이를 세척하고 분쇄하여 생산 공장으로 '다시 돌려보내어 살려 쓰다'.", cognates: "cycle(자전거, 순환)", group: "1. 자연과 환경" },
+            { word: "acid", meaning: "산(酸), 산성의", root: "ac(날카로운, 찌르다) → 레몬이나 식초를 한입 베어 물었을 때, 혀끝을 뾰족한 바늘로 찌르듯 '날카롭게 톡 쏘며 신맛이 나는' 화학 물질.", cognates: "acute(예리한), acupuncture(침술)", group: "1. 자연과 환경" },
+            { word: "sweep", meaning: "쓸다, 휩쓸다", root: "고대영어 swapan (돌진하다) → 빗자루로 바닥을 훔치거나, 태풍이 거센 바람으로 마을의 나무와 지붕을 한꺼번에 무섭게 훅 '쓸어버리다'.", cognates: "swoop(급강하하다)", group: "1. 자연과 환경" },
+            { word: "landfill", meaning: "쓰레기 매립지", root: "land(땅) + fill(채우다) → 산처럼 쌓인, 더 이상 재활용할 수도 없는 거대한 쓰레기 더미로 움푹 파인 '땅을 메워서 채워버리는 공간'.", cognates: "fill(채우다)", group: "1. 자연과 환경" },
+            { word: "fragile", meaning: "부서지기 쉬운, 취약한", root: "frag(부수다) + ile(하기 쉬운) → 튼튼한 강철이 아니라, 얇은 유리잔이나 잘 구워진 쿠키처럼 톡 하고 살짝만 건드려도 바스락 '부서지기 쉬운'.", cognates: "fragment(파편), fraction(분수)", group: "1. 자연과 환경" },
+            { word: "rainforest", meaning: "열대 우림", root: "rain(비) + forest(숲) → 일 년 내내 덥고 습한 '비가 엄청나게 많이 쏟아져서', 잎이 넓은 거대한 나무들이 빽빽하게 우거져 빛이 안 드는 '숲'.", cognates: "forest(숲)", group: "1. 자연과 환경" },
+            { word: "purify", meaning: "깨끗이 하다, 정화하다", root: "pur(순수한) + fy(만들다) → 진흙탕 같은 더러운 물이나, 타락한 마음속의 온갖 찌꺼기들을 필터로 싹 걸러내고 티 없이 '순수하게 만들다'.", cognates: "pure(순수한), puritan(청교도)", group: "1. 자연과 환경" },
+            { word: "atmosphere", meaning: "대기(권), 분위기", root: "atmos(증기) + sphere(구) → 우리가 사는 둥근 지구(구)를 투명한 솜이불처럼 빙 둘러 두껍게 감싸고 있는 기체(증기)의 층. 모임의 '분위기'로도 쓰임.", cognates: "sphere(구, 영역)", group: "1. 자연과 환경" },
+            { word: "cliff", meaning: "절벽", root: "고대영어 clif (오르다) → 평평한 해변이 아니라, 성난 바닷물이 오랜 세월 동안 땅을 깎아내어 만들어진, 위로 기어오르기 몹시 힘든 '수직 절벽'.", cognates: "climb(오르다 - 연관)", group: "1. 자연과 환경" },
+            { word: "peak", meaning: "산봉우리, 정상, 절정", root: "뾰족한 끝(pick)에서 변형 → 거대한 산맥에서 둥글지 않고 창끝처럼 가장 뾰족하게 하늘로 튀어나온 '정상'. 인생이나 계절의 '절정'을 뜻함.", cognates: "pick(찌르다, 고르다)", group: "1. 자연과 환경" },
+            { word: "landscape", meaning: "풍경, 경치", root: "land(땅) + scape(모양, 형태) → 좁은 방구석이 아니라, 창밖이나 산기슭에 서서 내려다볼 때 눈앞에 넓게 쫙 펼쳐진 아름다운 '땅의 모양'.", cognates: "shape(모양)", group: "1. 자연과 환경" },
+
+            // [2. 소통과 전달]
+            { word: "signal", meaning: "신호를 보내다, 암시하다", root: "sign(표시) + al → 굳이 목소리로 말하지 않아도, 불빛이나 깃발의 움직임을 이용해 멀리 있는 사람에게 내 의도를 알아채도록 '신호를 쏘다'.", cognates: "sign(기호), signature(서명)", group: "2. 소통과 전달" },
+            { word: "obscure", meaning: "분명치 않은, 모호한", root: "ob(덮어서) + scur(어두운) → 먹구름이 밝은 달을 덮어버린 것처럼, 어두침침해서 형체가 뚜렷하지 않고 말의 의미가 아리송하고 '모호한'.", cognates: "sky(하늘 - 어원적 연관)", group: "2. 소통과 전달" },
+            { word: "illustrate", meaning: "설명하다, 삽화를 넣다", root: "in(안으로) + lustr(빛나게 하다) + ate → 글만 빼곡해서 이해하기 어려운 책 속에, 재밌는 그림(삽화)을 넣어 이해의 빛을 환하게 '비춰 설명하다'.", cognates: "illustrious(저명한), luster(광택)", group: "2. 소통과 전달" },
+            { word: "envelope", meaning: "봉투", root: "en(안으로) + velop(감싸다) → 남에게 보이고 싶지 않은 중요한 편지나 서류를, 누군가가 열어보기 전까지 겉치마로 휙 '둘러싸서 감추는 덮개'.", cognates: "develop(개발하다 - 껍질을 벗기다)", group: "2. 소통과 전달" },
+            { word: "deliver", meaning: "배달하다, 연설하다", root: "de(강조/분리) + liber(자유롭게 하다) → 묶여있던 짐을 풀어내어 상대방의 문 앞까지 '자유롭게 넘겨주다(배달)'. 입안의 말을 사람들에게 뱉어내다(연설).", cognates: "liberty(자유), liberate(해방시키다)", group: "2. 소통과 전달" },
+            { word: "transmit", meaning: "보내다, 전송하다", root: "trans(가로질러) + mit(보내다) → 눈에 보이지 않는 라디오 전파나 이메일, 혹은 나쁜 바이러스를 허공의 공간을 훌쩍 '가로질러 저편으로 보내다'.", cognates: "submit(제출하다), admit(인정하다)", group: "2. 소통과 전달" },
+            { word: "verbal", meaning: "말의, 언어의, 구두의", root: "verb(단어, 말씀) + al → 펜으로 종이 위에 끄적이는 글씨나 몸짓이 아니라, 성대를 울려 입에서 튀어나오는 '단어와 소리(말)로만 이루어진'.", cognates: "verb(동사), proverb(속담)", group: "2. 소통과 전달" },
+            { word: "stamp", meaning: "우표, 도장; 날인하다", root: "고대영어 stampian (쾅쾅 밟다) → 옛날 사람들이 분노하여 발을 바닥에 쾅 구르듯, 종이 위에 잉크 묻힌 도장이나 우표를 '쾅 하고 억눌러 찍는 행위'.", cognates: "stomp(쿵쿵거리며 걷다)", group: "2. 소통과 전달" },
+            { word: "get in touch with", meaning: "~와 연락[접촉]하다", root: "touch(만지다, 닿다) → 수년 동안 멀리 떨어져 소식이 끊겼던 사람과, 마침내 손끝이 맞닿을(touch) 정도로 전화나 편지로 다시 '연락을 주고받다'.", cognates: "touch(만지다)", group: "2. 소통과 전달" },
+
+            // [3. 경제와 자원]
+            { word: "transaction", meaning: "거래, 매매", root: "trans(가로질러) + act(행동하다) + ion → 카운터 너머로 내 지갑의 돈과 점원의 물건이 서로의 선을 가로질러 오가며 '교환 행동이 이루어지는 거래'.", cognates: "action(행동), transfer(이동하다)", group: "3. 경제와 자원" },
+            { word: "union", meaning: "조합, 연합, 동맹", root: "uni(하나) + on → 힘없는 노동자들이나 작은 국가들이 뿔뿔이 흩어지지 않고, 거대한 적에 맞서 뜻을 모아 똘똘 뭉쳐 '하나(uni)가 된 거대한 연합'.", cognates: "unify(통일하다), unique(독특한)", group: "3. 경제와 자원" },
+            { word: "collect", meaning: "수집하다, 모으다", root: "col(함께) + lect(고르다) → 책상 서랍에 이리저리 흩어진 우표나 예쁜 동전들 중에서, 내 마음에 쏙 드는 것들만 정성스럽게 '함께 골라 모아두다'.", cognates: "select(선택하다), elect(선출하다)", group: "3. 경제와 자원" },
+            { word: "reduce", meaning: "줄이다, 감소시키다", root: "re(뒤로) + duc(이끌다) → 물건의 부피나 너무 비싼 가격표의 숫자를, 앞으로 팽창시키지 않고 옛날의 쪼그라든 상태로 '뒤로 확 끌어내려 줄이다'.", cognates: "produce(생산하다), educate(교육하다)", group: "3. 경제와 자원" },
+            { word: "diminish", meaning: "감소하다, 약화시키다", root: "di(완전히) + min(작은) + ish → 한때 하늘을 찌르던 명성이나 거대한 권력이, 세월이 흘러 원래보다 훨씬 '더 작게 쪼그라들고 초라해지도록 만들다'.", cognates: "mini(작은), minute(분, 미세한)", group: "3. 경제와 자원" },
+            { word: "resource", meaning: "자원, 물자", root: "re(다시) + source(솟아나다) → 깊은 산속 옹달샘에서 물을 푹푹 퍼내어 마셔도, 바닥나지 않고 '다시(re) 퐁퐁 솟아오르는' 샘물과 같은 귀중한 천연가스나 인력.", cognates: "source(원천)", group: "3. 경제와 자원" },
+            { word: "remain", meaning: "남아 있다", root: "re(뒤에) + main(머무르다) → 파티가 끝나고 친구들은 모두 각자의 집으로 떠나버렸는데, 나 혼자만 그 자리를 떠나지 못하고 고독하게 '뒤에 남아 머무르다'.", cognates: "mansion(대저택), permanent(영구적인)", group: "3. 경제와 자원" },
+            { word: "utilize", meaning: "활용하다, 이용하다", root: "util(유용한) + ize(~하게 하다) → 창고에 먼지 쌓인 채 방치된 물건이나 내가 배운 지식을 썩히지 않고, 내 삶의 목적에 맞게 아주 '쓸모 있게 써먹다'.", cognates: "utility(공익사업, 유용성)", group: "3. 경제와 자원" },
+            { word: "suitable", meaning: "적절한, 적합한", root: "suit(맞다) + able → 텅 빈 퍼즐 판에 남은 한 조각이 제자리에 쏙 들어가듯, 그날의 날씨나 면접관의 기준에 아주 '찰떡같이 꼭 들어맞는'.", cognates: "suit(정장, 어울리다)", group: "3. 경제와 자원" },
+            { word: "generate", meaning: "발생시키다, 만들어 내다", root: "gen(낳다, 종족) + ate → 발전소 터빈을 돌려 엄청난 전기를 만들어내거나, 천재적인 발명가가 새로운 아이디어를 생명체처럼 무에서 유로 '낳아(발생) 시키다'.", cognates: "generation(세대), gene(유전자)", group: "3. 경제와 자원" },
+            { word: "convert", meaning: "전환하다, 바꾸다", root: "con(완전히) + vert(돌리다) → 눈에 안 보이는 가스 형태를 찰랑이는 액체로, 혹은 내가 믿던 종교를 다른 쪽으로 '완전히 180도 방향을 돌려 뒤바꾸다'.", cognates: "invert(뒤집다), reverse(반대의)", group: "3. 경제와 자원" },
+            { word: "lessen", meaning: "줄다, 완화시키다", root: "less(더 적은) + en(동사화) → 진통제를 먹어 참을 수 없던 치통을 가라앉히거나, 배낭의 무거운 짐을 빼서 예전보다 훨씬 '더 적고 가볍게 만들어주다'.", cognates: "less(더 적은)", group: "3. 경제와 자원" },
+
+            // [4. 가치와 상태]
+            { word: "straw", meaning: "빨대, 지푸라기", root: "streaw(흩뿌려진 것) → 추수 후 텅 빈 채 바닥에 흩뿌려진 밀짚(지푸라기). 옛 사람들이 이 속이 빈 짚의 줄기를 잘라 음료를 빨아 마신 것에서 '빨대'가 됨.", cognates: "strew(흩뿌리다)", group: "4. 가치와 상태" },
+            { word: "satellite", meaning: "(인공)위성", root: "satelles(경호원, 수행원) → 달이 거대한 지구를 지키듯, 거대한 행성 주변을 밤낮없이 뱅글뱅글 맴돌며 곁을 지키고 호위하는 '우주의 경호원(위성)'.", cognates: "-", group: "4. 가치와 상태" },
+            { word: "cherish", meaning: "소중히 하다", root: "carus(값비싼, 소중한) → 남들은 잡동사니라 부를지라도, 내게는 첫사랑의 편지처럼 너무나 가치 있어서 가슴속 깊이 품고 아주 '소중하게 여기다'.", cognates: "charity(자선, 사랑), caress(애무하다)", group: "4. 가치와 상태" },
+            { word: "affair", meaning: "일, 문제, 사건", root: "ad(~로) + facere(하다) → 남의 일이라 뒷짐 지고 구경할 수 없고, 결국 내가 내 발로 직접 앞으로 뛰어들어서 '처리해야만 하는 복잡한 일이나 스캔들'.", cognates: "factory(공장), affect(영향을 미치다)", group: "4. 가치와 상태" },
+            { word: "appealing", meaning: "매력적인, 흥미를 끄는", root: "ad(~에) + pel(부르다, 밀다) + ing → 길거리를 지나가는 사람들의 무관심한 시선이나 마음을, 자기 쪽으로 강력한 자석처럼 확 '끌어당기며 매혹적인'.", cognates: "appeal(호소하다), compel(강요하다)", group: "4. 가치와 상태" },
+
+            // [5. 행동과 구동사]
+            { word: "feel free to do", meaning: "자유롭게 [마음대로] ~하다", root: "free(자유로운) → 윗사람의 눈치를 살피며 쭈뼛거리지 말고, 마치 하늘을 나는 새 깃털처럼 가볍고 편안한 '자유로운 마음으로 거리낌 없이 ~하다'.", cognates: "free(자유로운), freedom(자유)", group: "5. 행동과 구동사" }
+        ]
+    };
+
+    let currentLesson = 23;
+    let currentCardIndex = 0;
+    let isFlipped = false;
+    let currentFlatWordList = [];
+
+    // 단원 설정
+    function setLesson(lessonNumber) {
+        currentLesson = lessonNumber;
+        currentCardIndex = 0;
+
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.classList.remove('active');
+            btn.classList.replace('text-sky-600', 'text-slate-500');
+            btn.classList.replace('border-sky-600', 'border-transparent');
+            btn.classList.remove('bg-sky-50');
+        });
+        const activeTab = document.getElementById(`tab-${lessonNumber}`);
+        activeTab.classList.add('active');
+        activeTab.classList.replace('text-slate-500', 'text-sky-600');
+        activeTab.classList.replace('border-transparent', 'border-sky-600');
+        activeTab.classList.add('bg-sky-50');
+
+        renderList();
+    }
+
+    // 리스트 렌더링
+    function renderList() {
+        const listView = document.getElementById('listView');
+        let htmlContent = '';
+        
+        const words = db[currentLesson];
+        currentFlatWordList = words;
+
+        const groupedData = words.reduce((acc, word) => {
+            if (!acc[word.group]) acc[word.group] = [];
+            acc[word.group].push(word);
+            return acc;
+        }, {});
+
+        let globalWordIndex = 0;
+
+        for (const [groupName, groupWords] of Object.entries(groupedData)) {
+            htmlContent += `
+                <div class="mb-6 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden">
+                    <div class="bg-slate-100 border-b border-slate-200 py-2.5 px-4">
+                        <h2 class="text-[0.8rem] font-bold text-slate-700 tracking-wide"><i class="fa-solid fa-bookmark text-sky-500 mr-2"></i>${groupName}</h2>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+            `;
+            
+            groupWords.forEach((item, index) => {
+                const id = `word-${currentLesson}-${globalWordIndex++}`;
+                htmlContent += `
+                    <div>
+                        <div class="p-4 flex justify-between items-center cursor-pointer hover:bg-slate-50 transition-colors" onclick="toggleAccordion('${id}')">
+                            <div class="pr-4">
+                                <h3 class="text-[1.1rem] font-bold text-slate-800">${item.word}</h3>
+                                <p class="text-sm font-medium text-slate-500 mt-0.5">${item.meaning}</p>
+                            </div>
+                            <div class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-100 text-slate-400 shrink-0">
+                                <i id="icon-${id}" class="fa-solid fa-chevron-down text-sm transition-transform duration-300"></i>
+                            </div>
                         </div>
-                        <div class="mt-2 text-sm font-medium text-slate-600 border-t border-slate-200/60 pt-2">
-                            <span class="text-indigo-600">뜻:</span> ${item.meaning}
-                        </div>
-                        <div class="mt-2 text-xs text-slate-500 bg-white p-2 rounded border border-slate-100">
-                            <strong class="text-amber-600">💡 어원:</strong> ${item.etymology}
-                        </div>
-                        <div class="mt-1 text-xs text-slate-500 bg-white p-2 rounded border border-slate-100">
-                            <strong class="text-emerald-600">🌿 동계어:</strong> ${item.cognates}
+                        
+                        <div id="content-${id}" class="accordion-content bg-slate-50 px-5">
+                            <div class="mb-4">
+                                <span class="inline-block bg-sky-100 text-sky-800 text-[0.7rem] px-2 py-1 rounded-md font-bold mb-2 shadow-sm border border-sky-200">
+                                    <i class="fa-solid fa-wand-magic-sparkles mr-1"></i>어원의 비밀
+                                </span>
+                                <p class="text-sm text-slate-700 leading-relaxed font-medium break-keep">${item.root}</p>
+                            </div>
+                            <div class="pb-2">
+                                <span class="inline-block bg-emerald-100 text-emerald-800 text-[0.7rem] px-2 py-1 rounded-md font-bold mb-1 border border-emerald-200">
+                                    <i class="fa-solid fa-network-wired mr-1"></i>동계어 (Family)
+                                </span>
+                                <p class="text-sm text-slate-600 font-semibold pl-1">${item.cognates}</p>
+                            </div>
                         </div>
                     </div>
-                `).join('');
-            } else {
-                const item = shuffledData[cardIndex];
-                
-                // 카드 모드일 때 푸터 구조 파괴 없이 내부 content 영역만 분리 제어 (안전한 스위칭 구현)
-                footerContent.className = "w-full flex justify-between items-center px-2";
-                footerContent.innerHTML = `
-                    <button onclick="prevCard()" class="px-4 py-2 bg-slate-200 text-slate-700 font-bold rounded-lg ${cardIndex === 0 ? 'opacity-50 pointer-events-none' : ''}">이전</button>
-                    <span class="font-semibold text-slate-600">${cardIndex + 1} / ${shuffledData.length}</span>
-                    <button onclick="nextCard()" class="px-4 py-2 bg-indigo-600 text-white font-bold rounded-lg ${cardIndex === shuffledData.length - 1 ? 'opacity-50 pointer-events-none' : ''}">다음</button>
                 `;
-                
-                container.innerHTML = `
-                    <div class="text-center text-xs text-slate-400 mb-2">💡 카드를 터치하면 뜻과 어원이 나타납니다.</div>
-                    <div class="card-flip w-full h-80 cursor-pointer" onclick="flipCard()">
-                        <div id="card-inner" class="card-inner w-full h-full relative rounded-2xl shadow-lg border border-slate-200">
-                            <div class="card-front absolute w-full h-full bg-indigo-50 flex flex-col justify-center items-center rounded-2xl p-6">
-                                <span class="text-xs text-indigo-400 font-bold tracking-widest mb-4">WORD</span>
-                                <h2 class="text-3xl font-extrabold text-indigo-700 tracking-tight">${item.word}</h2>
-                            </div>
-                            <div class="card-back absolute w-full h-full bg-white flex flex-col justify-between rounded-2xl p-6 overflow-y-auto">
-                                <div>
-                                    <span class="text-xs text-emerald-500 font-bold tracking-widest block mb-2">MEANING</span>
-                                    <h3 class="text-xl font-bold text-slate-800 border-b pb-2 border-slate-100">${item.meaning}</h3>
-                                </div>
-                                <div class="my-3 text-left space-y-2">
-                                    <p class="text-xs text-slate-600"><strong class="text-amber-600 block mb-0.5">💡 어원</strong> ${item.etymology}</p>
-                                    <p class="text-xs text-slate-600"><strong class="text-emerald-600 block mb-0.5">🌿 동계어</strong> ${item.cognates}</p>
-                                </div>
-                                <span class="text-[10px] text-slate-300">다시 터치하면 앞면으로 돌아갑니다.</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
+            });
+            htmlContent += `</div></div>`;
         }
+        listView.innerHTML = htmlContent;
+        updateFlashcard();
+    }
 
-        function flipCard() {
-            document.getElementById('card-inner').classList.toggle('card-flipped');
+    function toggleAccordion(id) {
+        const content = document.getElementById(`content-${id}`);
+        const icon = document.getElementById(`icon-${id}`);
+        
+        if (content.classList.contains('open')) {
+            content.classList.remove('open');
+            icon.classList.remove('rotate-180');
+        } else {
+            // 다른 열린 아코디언 닫기 (옵션)
+            // document.querySelectorAll('.accordion-content.open').forEach(el => el.classList.remove('open'));
+            // document.querySelectorAll('.fa-chevron-down.rotate-180').forEach(el => el.classList.remove('rotate-180'));
+            
+            content.classList.add('open');
+            icon.classList.add('rotate-180');
         }
+    }
 
-        function nextCard() {
-            if (cardIndex < shuffledData.length - 1) {
-                cardIndex++;
-                renderContent();
-            }
+    function toggleMode() {
+        const flashcardView = document.getElementById('flashcardView');
+        const modeBtn = document.getElementById('modeToggleBtn');
+        
+        if (flashcardView.classList.contains('hidden')) {
+            flashcardView.classList.remove('hidden');
+            flashcardView.classList.add('flex');
+            modeBtn.innerHTML = '<i class="fa-solid fa-list mr-1"></i> 목록보기';
+            updateFlashcard();
+        } else {
+            flashcardView.classList.add('hidden');
+            flashcardView.classList.remove('flex');
+            modeBtn.innerHTML = '<i class="fa-solid fa-layer-group mr-1"></i> 카드모드';
         }
+    }
 
-        function prevCard() {
-            if (cardIndex > 0) {
-                cardIndex--;
-                renderContent();
-            }
+    function updateFlashcard() {
+        const item = currentFlatWordList[currentCardIndex];
+        document.getElementById('cardGroup').innerText = `${currentLesson}강 - ${item.group.substring(3)}`;
+        document.getElementById('cardWord').innerText = item.word;
+        document.getElementById('cardWordBack').innerText = item.word;
+        document.getElementById('cardMeaning').innerText = item.meaning;
+        document.getElementById('cardRoot').innerText = item.root;
+        document.getElementById('cardCognates').innerText = item.cognates;
+        
+        document.getElementById('flashcardCounter').innerText = `${currentCardIndex + 1} / ${currentFlatWordList.length}`;
+        
+        if(isFlipped) {
+            document.getElementById('flashcard').classList.remove('rotate-y-180');
+            isFlipped = false;
         }
+    }
 
-        // 최초 실행 시 자동으로 무작위 배열 적용
-        reshuffleWords();
-    </script>
+    function flipCard() {
+        const card = document.getElementById('flashcard');
+        isFlipped = !isFlipped;
+        if (isFlipped) {
+            card.classList.add('rotate-y-180');
+        } else {
+            card.classList.remove('rotate-y-180');
+        }
+    }
+
+    function prevCard() {
+        currentCardIndex = (currentCardIndex > 0) ? currentCardIndex - 1 : currentFlatWordList.length - 1;
+        updateFlashcard();
+    }
+
+    function nextCard() {
+        currentCardIndex = (currentCardIndex < currentFlatWordList.length - 1) ? currentCardIndex + 1 : 0;
+        updateFlashcard();
+    }
+
+    window.onload = () => {
+        setLesson(23); // 초기 로드
+    };
+</script>
 </body>
 </html>
